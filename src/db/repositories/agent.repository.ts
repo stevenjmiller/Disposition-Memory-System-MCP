@@ -3,7 +3,7 @@ import sql from "mssql/msnodesqlv8.js";
 export interface AgentInfo {
   agent_id: string;
   agent_name: string;
-  current_model_version: string | null;
+  current_model: string | null;
   status: string;
 }
 
@@ -15,7 +15,7 @@ export class AgentRepository {
       .request()
       .input("agent_id", sql.UniqueIdentifier, agentId)
       .query(`
-        SELECT agent_id, agent_name, current_model_version, status
+        SELECT agent_id, agent_name, current_model, status
         FROM agents
         WHERE agent_id = @agent_id
       `);
@@ -32,7 +32,8 @@ export class AgentRepository {
       .input("model_version", sql.NVarChar(100), newModelVersion)
       .query(`
         UPDATE agents
-        SET current_model_version = @model_version
+        SET current_model = @model_version,
+            model_updated_at = SYSUTCDATETIME()
         WHERE agent_id = @agent_id
       `);
   }

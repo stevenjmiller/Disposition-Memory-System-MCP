@@ -64,20 +64,20 @@ export function registerOrient(
       const agent = await agentRepo.getAgent(agentId);
       if (
         agent &&
-        agent.current_model_version &&
-        agent.current_model_version !== config.modelVersion
+        agent.current_model &&
+        agent.current_model !== config.modelVersion
       ) {
         // Record the transition
         await agentRepo.recordModelTransition(
           agentId,
-          agent.current_model_version,
+          agent.current_model,
           config.modelVersion
         );
         // Update agent's model version
         await agentRepo.updateModelVersion(agentId, config.modelVersion);
 
         modelTransition = {
-          previous_model: agent.current_model_version,
+          previous_model: agent.current_model,
           current_model: config.modelVersion,
           transitioned_at: new Date().toISOString(),
           note:
@@ -86,7 +86,7 @@ export function registerOrient(
         };
 
         console.error(
-          `[orient] Model transition: ${agent.current_model_version} → ${config.modelVersion}`
+          `[orient] Model transition: ${agent.current_model} → ${config.modelVersion}`
         );
       }
 
