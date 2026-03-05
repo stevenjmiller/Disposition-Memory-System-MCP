@@ -328,6 +328,66 @@ async function main(): Promise<void> {
     `Non-existent memory returns "memory_not_found"`
   );
 
+  // ── 8b. Effective Salience Algorithm ────────────────────────────
+  console.log("\n── effective_salience (algorithm verification) ──");
+
+  // Recall salient and verify effective_salience is a computed number
+  const salientAfterContest = parseResult(
+    await client.callTool({
+      name: "recall_salient",
+      arguments: { limit: 20, scope: "self", include_resolved: true },
+    })
+  ) as {
+    memories: Array<{
+      memory_id: string;
+      effective_salience: number;
+    }>;
+    count: number;
+  };
+
+  // All memories must have a numeric effective_salience in [0, 1]
+  assert(
+    salientAfterContest.memories.every(
+      (m) =>
+        typeof m.effective_salience === "number" &&
+        m.effective_salience >= 0 &&
+        m.effective_salience <= 1
+    ),
+    `All memories have effective_salience in [0, 1]`
+  );
+
+  // The contested memory should have lower effective_salience than the uncontested one
+  // (testMemoryId was self-contested with confidence 0.8 → drag = 0.24)
+  const contestedMem = salientAfterContest.memories.find(
+    (m) => m.memory_id === testMemoryId
+  );
+  const uncontestedMem = salientAfterContest.memories.find(
+    (m) => m.memory_id === secondMemoryId
+  );
+
+  if (contestedMem && uncontestedMem) {
+    assert(
+      contestedMem.effective_salience < uncontestedMem.effective_salience ||
+        contestedMem.effective_salience < 0.7,
+      `Self-contested memory has reduced effective_salience ` +
+        `(${contestedMem.effective_salience.toFixed(4)} < raw 0.7)`
+    );
+  } else {
+    console.log("  ⏭️  Could not find both memories for contestation impact test");
+  }
+
+  // Verify descending order is by effective_salience
+  const postContestSaliences = salientAfterContest.memories.map(
+    (m) => m.effective_salience
+  );
+  const postContestDescending = postContestSaliences.every(
+    (s, i) => i === 0 || s <= postContestSaliences[i - 1]
+  );
+  assert(
+    postContestDescending,
+    `Post-contest: memories sorted by effective_salience DESC`
+  );
+
   // ── 9. Resolve Tension ──────────────────────────────────────────
   console.log("\n── resolve_tension ──");
 
