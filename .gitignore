@@ -280,6 +280,9 @@ ServiceFabricBackup/
 # Node.js build output
 dist/
 
+# Claude Code working directories
+.claude/
+
 # SQL Server files
 *.mdf
 *.ldf
