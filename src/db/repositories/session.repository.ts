@@ -51,6 +51,27 @@ export class SessionRepository {
     return result.recordset[0] ?? null;
   }
 
+  async getLastClosedSession(
+    agentId: string
+  ): Promise<{
+    session_id: string;
+    summary: string | null;
+    outcome_valence: string | null;
+    started_at: Date;
+    ended_at: Date;
+  } | null> {
+    const result = await this.pool
+      .request()
+      .input("agent_id", sql.UniqueIdentifier, agentId)
+      .query(`
+        SELECT TOP 1 session_id, summary, outcome_valence, started_at, ended_at
+        FROM sessions
+        WHERE agent_id = @agent_id AND ended_at IS NOT NULL
+        ORDER BY ended_at DESC
+      `);
+    return result.recordset[0] ?? null;
+  }
+
   async closeSession(
     sessionId: string,
     summary: string,

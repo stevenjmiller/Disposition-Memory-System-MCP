@@ -15,8 +15,25 @@ export interface InsertMemoryParams {
   visibility: Visibility;
 }
 
+export interface RecalledMemory {
+  memory_id: string;
+  agent_id: string;
+  entry: string;
+  memory_type: string;
+  confidence: number;
+  valence: string;
+  salience: number;
+  tension: string | null;
+  orientation: string | null;
+  is_resolved: boolean;
+  created_at: Date;
+  tags: string | null;
+}
+
 export class MemoryRepository {
   constructor(private pool: sql.ConnectionPool) {}
+
+  // ── Write Operations ──────────────────────────────────────────────
 
   async insert(params: InsertMemoryParams): Promise<string> {
     const result = await this.pool
@@ -83,5 +100,250 @@ export class MemoryRepository {
         WHERE memory_id = @memory_id
       `);
     return result.recordset[0] ?? null;
+  }
+
+  // ── Scoping Helpers ───────────────────────────────────────────────
+
+  /**
+   * Build the scoping WHERE clause fragment.
+   * - self:   own memories only (any visibility)
+   * - others: contributed memories from active, non-quarantined agents
+   * - all:    union of self + others
+   */
+  private getScopeClause(scope: string): string {
+    switch (scope) {
+      case "self":
+        return `m.agent_id = @agent_id`;
+      case "others":
+        return `(
+          m.agent_id != @agent_id
+          AND m.visibility = 'contributed'
+          AND m.is_quarantined = 0
+          AND EXISTS (
+            SELECT 1 FROM agents a
+            WHERE a.agent_id = m.agent_id AND a.status = 'active'
+          )
+        )`;
+      case "all":
+      default:
+        return `(
+          m.agent_id = @agent_id
+          OR (
+            m.visibility = 'contributed'
+            AND m.agent_id != @agent_id
+            AND m.is_quarantined = 0
+            AND EXISTS (
+              SELECT 1 FROM agents a
+              WHERE a.agent_id = m.agent_id AND a.status = 'active'
+            )
+          )
+        )`;
+    }
+  }
+
+  /**
+   * Common SELECT columns for recalled memories, including
+   * comma-delimited context tags via STRING_AGG.
+   */
+  private get recallColumns(): string {
+    return `
+      m.memory_id, m.agent_id, m.entry, m.memory_type,
+      m.confidence, m.valence, m.salience,
+      m.tension, m.orientation, m.is_resolved, m.created_at,
+      (SELECT STRING_AGG(ct.tag_name, ',')
+       FROM memory_context_tags mct
+       JOIN context_tags ct ON ct.tag_id = mct.tag_id
+       WHERE mct.memory_id = m.memory_id) AS tags
+    `;
+  }
+
+  // ── Recall Queries ────────────────────────────────────────────────
+
+  /**
+   * Reverse chronological memories with scoping.
+   */
+  async recallRecent(
+    agentId: string,
+    scope: string,
+    limit: number,
+    sessionId?: string
+  ): Promise<RecalledMemory[]> {
+    const scopeClause = this.getScopeClause(scope);
+    const sessionFilter = sessionId
+      ? `AND m.session_id = @session_id`
+      : "";
+
+    const request = this.pool
+      .request()
+      .input("agent_id", sql.UniqueIdentifier, agentId)
+      .input("limit", sql.Int, limit);
+
+    if (sessionId) {
+      request.input("session_id", sql.UniqueIdentifier, sessionId);
+    }
+
+    const result = await request.query(`
+      SELECT TOP (@limit) ${this.recallColumns}
+      FROM memories m
+      WHERE ${scopeClause}
+        AND m.is_quarantined = 0
+        ${sessionFilter}
+      ORDER BY m.created_at DESC
+    `);
+
+    return result.recordset;
+  }
+
+  /**
+   * Unresolved tensions ranked by salience with scoping.
+   */
+  async recallUnresolved(
+    agentId: string,
+    scope: string,
+    limit: number,
+    minSalience: number
+  ): Promise<RecalledMemory[]> {
+    const scopeClause = this.getScopeClause(scope);
+
+    const result = await this.pool
+      .request()
+      .input("agent_id", sql.UniqueIdentifier, agentId)
+      .input("limit", sql.Int, limit)
+      .input("min_salience", sql.Decimal(3, 2), minSalience)
+      .query(`
+        SELECT TOP (@limit) ${this.recallColumns}
+        FROM memories m
+        WHERE ${scopeClause}
+          AND m.is_quarantined = 0
+          AND m.is_resolved = 0
+          AND m.tension IS NOT NULL
+          AND m.salience >= @min_salience
+        ORDER BY m.salience DESC, m.created_at DESC
+      `);
+
+    return result.recordset;
+  }
+
+  /**
+   * Most important memories ranked by salience with scoping.
+   * (Uses raw salience for now; effective salience aging algorithm TBD.)
+   */
+  async recallSalient(
+    agentId: string,
+    scope: string,
+    limit: number,
+    memoryType?: string,
+    includeResolved?: boolean
+  ): Promise<RecalledMemory[]> {
+    const scopeClause = this.getScopeClause(scope);
+    const typeFilter = memoryType
+      ? `AND m.memory_type = @memory_type`
+      : "";
+    const resolvedFilter = includeResolved
+      ? ""
+      : `AND m.is_resolved = 0`;
+
+    const request = this.pool
+      .request()
+      .input("agent_id", sql.UniqueIdentifier, agentId)
+      .input("limit", sql.Int, limit);
+
+    if (memoryType) {
+      request.input("memory_type", sql.VarChar(30), memoryType);
+    }
+
+    const result = await request.query(`
+      SELECT TOP (@limit) ${this.recallColumns}
+      FROM memories m
+      WHERE ${scopeClause}
+        AND m.is_quarantined = 0
+        ${resolvedFilter}
+        ${typeFilter}
+      ORDER BY m.salience DESC, m.created_at DESC
+    `);
+
+    return result.recordset;
+  }
+
+  /**
+   * Keyword/tag/text search across memories with scoping.
+   * Matches against context_tags, extracted keywords, and entry text.
+   */
+  async recallSearch(
+    agentId: string,
+    scope: string,
+    keywords: string[],
+    operator: string,
+    limit: number,
+    fromDate?: string,
+    toDate?: string,
+    memoryType?: string
+  ): Promise<RecalledMemory[]> {
+    const scopeClause = this.getScopeClause(scope);
+
+    // Date filters
+    const dateFilters: string[] = [];
+    if (fromDate) dateFilters.push(`m.created_at >= @from_date`);
+    if (toDate) dateFilters.push(`m.created_at <= @to_date`);
+    const dateClause =
+      dateFilters.length > 0 ? `AND ${dateFilters.join(" AND ")}` : "";
+
+    const typeFilter = memoryType
+      ? `AND m.memory_type = @memory_type`
+      : "";
+
+    // Build keyword matching conditions
+    // Each keyword is matched against context_tags, extracted keywords, and entry text
+    const keywordConditions = keywords.map(
+      (_, i) => `(
+        EXISTS (
+          SELECT 1 FROM memory_context_tags mct
+          JOIN context_tags ct ON ct.tag_id = mct.tag_id
+          WHERE mct.memory_id = m.memory_id
+            AND ct.tag_name LIKE @kw_${i}
+        )
+        OR EXISTS (
+          SELECT 1 FROM memory_keywords mk
+          JOIN keywords k ON k.keyword_id = mk.keyword_id
+          WHERE mk.memory_id = m.memory_id
+            AND k.keyword LIKE @kw_${i}
+        )
+        OR m.entry LIKE @kw_${i}
+      )`
+    );
+
+    const keywordClause =
+      operator === "AND"
+        ? keywordConditions.join(" AND ")
+        : keywordConditions.join(" OR ");
+
+    const request = this.pool
+      .request()
+      .input("agent_id", sql.UniqueIdentifier, agentId)
+      .input("limit", sql.Int, limit);
+
+    // Add keyword params (with wildcards for LIKE matching)
+    keywords.forEach((kw, i) => {
+      request.input(`kw_${i}`, sql.NVarChar(200), `%${kw}%`);
+    });
+
+    if (fromDate)
+      request.input("from_date", sql.DateTime2, new Date(fromDate));
+    if (toDate) request.input("to_date", sql.DateTime2, new Date(toDate));
+    if (memoryType)
+      request.input("memory_type", sql.VarChar(30), memoryType);
+
+    const result = await request.query(`
+      SELECT TOP (@limit) ${this.recallColumns}
+      FROM memories m
+      WHERE ${scopeClause}
+        AND m.is_quarantined = 0
+        AND (${keywordClause})
+        ${dateClause}
+        ${typeFilter}
+      ORDER BY m.salience DESC, m.created_at DESC
+    `);
+
+    return result.recordset;
   }
 }
