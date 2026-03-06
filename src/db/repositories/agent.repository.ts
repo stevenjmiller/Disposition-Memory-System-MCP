@@ -54,12 +54,12 @@ export class AgentRepository {
     const result = await this.pool
       .request()
       .input("agent_id", sql.UniqueIdentifier, agentId)
-      .input("from_model", sql.NVarChar(100), fromModel)
-      .input("to_model", sql.NVarChar(100), toModel)
+      .input("previous_model", sql.NVarChar(100), fromModel)
+      .input("new_model", sql.NVarChar(100), toModel)
       .query(`
-        INSERT INTO agent_model_transitions (agent_id, from_model, to_model)
+        INSERT INTO agent_model_transitions (agent_id, previous_model, new_model)
         OUTPUT INSERTED.transition_id
-        VALUES (@agent_id, @from_model, @to_model)
+        VALUES (@agent_id, @previous_model, @new_model)
       `);
     return result.recordset[0].transition_id;
   }

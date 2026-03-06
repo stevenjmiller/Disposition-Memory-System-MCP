@@ -1,7 +1,7 @@
 {
   "suite": "integration",
-  "timestamp": "2026-03-06T14:59:09.355Z",
-  "total_ms": 4799.39,
+  "timestamp": "2026-03-06T17:39:22.368Z",
+  "total_ms": 4736.35,
   "assertions": {
     "passed": 33,
     "failed": 0,
@@ -10,84 +10,84 @@
   "sections": [
     {
       "name": "Tool Registration",
-      "ms": 7.13,
+      "ms": 7.16,
       "assertions": 2,
       "passed": 2,
       "failed": 0
     },
     {
       "name": "orient",
-      "ms": 74.18,
+      "ms": 92.61,
       "assertions": 3,
       "passed": 3,
       "failed": 0
     },
     {
       "name": "log_disposition",
-      "ms": 1824.5,
+      "ms": 1522.15,
       "assertions": 4,
       "passed": 4,
       "failed": 0
     },
     {
       "name": "recall_recent",
-      "ms": 57.6,
+      "ms": 55.15,
       "assertions": 4,
       "passed": 4,
       "failed": 0
     },
     {
       "name": "recall_unresolved",
-      "ms": 19.6,
+      "ms": 20.87,
       "assertions": 2,
       "passed": 2,
       "failed": 0
     },
     {
       "name": "recall_salient",
-      "ms": 109.23,
+      "ms": 129.09,
       "assertions": 3,
       "passed": 3,
       "failed": 0
     },
     {
       "name": "recall_search",
-      "ms": 200.47,
+      "ms": 292.84,
       "assertions": 3,
       "passed": 3,
       "failed": 0
     },
     {
       "name": "contest_memory",
-      "ms": 9.42,
+      "ms": 10.74,
       "assertions": 4,
       "passed": 4,
       "failed": 0
     },
     {
       "name": "effective_salience (algorithm verification)",
-      "ms": 63.57,
+      "ms": 74.67,
       "assertions": 2,
       "passed": 2,
       "failed": 0
     },
     {
       "name": "resolve_tension",
-      "ms": 12.15,
+      "ms": 12.8,
       "assertions": 2,
       "passed": 2,
       "failed": 0
     },
     {
       "name": "recall_unresolved (post-resolve)",
-      "ms": 5.52,
+      "ms": 5.98,
       "assertions": 1,
       "passed": 1,
       "failed": 0
     },
     {
       "name": "close_session",
-      "ms": 2021.87,
+      "ms": 2021.29,
       "assertions": 3,
       "passed": 3,
       "failed": 0

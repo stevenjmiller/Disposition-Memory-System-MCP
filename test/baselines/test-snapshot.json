@@ -1,6 +1,6 @@
 {
-  "timestamp": "2026-03-06T14:59:16.925Z",
-  "total_ms": 8636.7,
+  "timestamp": "2026-03-06T17:37:29.179Z",
+  "total_ms": 8833.33,
   "total_assertions": {
     "passed": 187,
     "failed": 0,
@@ -9,8 +9,8 @@
   "suites": [
     {
       "suite": "decay-profiles",
-      "timestamp": "2026-03-06T14:59:02.231Z",
-      "total_ms": 3.89,
+      "timestamp": "2026-03-06T17:00:24.707Z",
+      "total_ms": 1.72,
       "assertions": {
         "passed": 31,
         "failed": 0,
@@ -19,56 +19,56 @@
       "sections": [
         {
           "name": "Scenario 1: Resolved action, conf=0.3 (fastest decay)",
-          "ms": 0.63,
+          "ms": 0.38,
           "assertions": 5,
           "passed": 5,
           "failed": 0
         },
         {
           "name": "Scenario 2: Resolved observation, conf=0.5 (baseline)",
-          "ms": 0.5,
+          "ms": 0.18,
           "assertions": 4,
           "passed": 4,
           "failed": 0
         },
         {
           "name": "Scenario 3: Resolved decision, conf=0.9 (moderate retention)",
-          "ms": 0.25,
+          "ms": 0.07,
           "assertions": 4,
           "passed": 4,
           "failed": 0
         },
         {
           "name": "Scenario 4: Unresolved tension, negative valence (slow decay)",
-          "ms": 0.37,
+          "ms": 0.08,
           "assertions": 5,
           "passed": 5,
           "failed": 0
         },
         {
           "name": "Scenario 5: Unresolved blocker, conf=0.9 (slowest decay)",
-          "ms": 0.45,
+          "ms": 0.08,
           "assertions": 5,
           "passed": 5,
           "failed": 0
         },
         {
           "name": "Cross-Scenario Ordering",
-          "ms": 0.19,
+          "ms": 0.04,
           "assertions": 3,
           "passed": 3,
           "failed": 0
         },
         {
           "name": "Decay Rate Ordering",
-          "ms": 0.28,
+          "ms": 0.08,
           "assertions": 3,
           "passed": 3,
           "failed": 0
         },
         {
           "name": "Floor Clamping",
-          "ms": 0.21,
+          "ms": 0.13,
           "assertions": 2,
           "passed": 2,
           "failed": 0
@@ -77,8 +77,8 @@
     },
     {
       "suite": "effective-salience",
-      "timestamp": "2026-03-06T14:59:01.624Z",
-      "total_ms": 3.96,
+      "timestamp": "2026-03-06T17:00:23.997Z",
+      "total_ms": 2.35,
       "assertions": {
         "passed": 34,
         "failed": 0,
@@ -87,126 +87,126 @@
       "sections": [
         {
           "name": "Fresh Memory (age=0)",
-          "ms": 0.52,
+          "ms": 0.34,
           "assertions": 5,
           "passed": 5,
           "failed": 0
         },
         {
           "name": "Time Decay (30 days)",
-          "ms": 0.33,
-          "assertions": 3,
-          "passed": 3,
-          "failed": 0
-        },
-        {
-          "name": "Unresolved Tension Slows Decay",
-          "ms": 0.16,
-          "assertions": 2,
-          "passed": 2,
-          "failed": 0
-        },
-        {
-          "name": "Memory Type Effects",
-          "ms": 0.14,
-          "assertions": 2,
-          "passed": 2,
-          "failed": 0
-        },
-        {
-          "name": "Access Boost",
-          "ms": 0.17,
-          "assertions": 2,
-          "passed": 2,
-          "failed": 0
-        },
-        {
-          "name": "Access Boost Recency Brackets",
-          "ms": 0.26,
-          "assertions": 3,
-          "passed": 3,
-          "failed": 0
-        },
-        {
-          "name": "Access Boost Cap",
-          "ms": 0.09,
-          "assertions": 1,
-          "passed": 1,
-          "failed": 0
-        },
-        {
-          "name": "Reinforcement Boost",
-          "ms": 0.09,
-          "assertions": 1,
-          "passed": 1,
-          "failed": 0
-        },
-        {
-          "name": "Reinforcement Boost (no data)",
-          "ms": 0.09,
-          "assertions": 1,
-          "passed": 1,
-          "failed": 0
-        },
-        {
-          "name": "Reinforcement Boost Cap",
-          "ms": 0.08,
-          "assertions": 1,
-          "passed": 1,
-          "failed": 0
-        },
-        {
-          "name": "Self-Contestation Drag",
-          "ms": 0.13,
-          "assertions": 2,
-          "passed": 2,
-          "failed": 0
-        },
-        {
-          "name": "External Contestation Drag",
-          "ms": 0.16,
-          "assertions": 1,
-          "passed": 1,
-          "failed": 0
-        },
-        {
-          "name": "Combined Contestation",
-          "ms": 0.11,
-          "assertions": 1,
-          "passed": 1,
-          "failed": 0
-        },
-        {
-          "name": "Verified Memory",
-          "ms": 0.12,
-          "assertions": 2,
-          "passed": 2,
-          "failed": 0
-        },
-        {
-          "name": "Floor Clamp (0.0)",
-          "ms": 0.08,
-          "assertions": 1,
-          "passed": 1,
-          "failed": 0
-        },
-        {
-          "name": "Ceiling Clamp (1.0)",
-          "ms": 0.08,
-          "assertions": 1,
-          "passed": 1,
-          "failed": 0
-        },
-        {
-          "name": "Spec Decay Profile Validation",
           "ms": 0.19,
           "assertions": 3,
           "passed": 3,
           "failed": 0
         },
         {
+          "name": "Unresolved Tension Slows Decay",
+          "ms": 0.08,
+          "assertions": 2,
+          "passed": 2,
+          "failed": 0
+        },
+        {
+          "name": "Memory Type Effects",
+          "ms": 0.06,
+          "assertions": 2,
+          "passed": 2,
+          "failed": 0
+        },
+        {
+          "name": "Access Boost",
+          "ms": 0.16,
+          "assertions": 2,
+          "passed": 2,
+          "failed": 0
+        },
+        {
+          "name": "Access Boost Recency Brackets",
+          "ms": 0.1,
+          "assertions": 3,
+          "passed": 3,
+          "failed": 0
+        },
+        {
+          "name": "Access Boost Cap",
+          "ms": 0.02,
+          "assertions": 1,
+          "passed": 1,
+          "failed": 0
+        },
+        {
+          "name": "Reinforcement Boost",
+          "ms": 0.04,
+          "assertions": 1,
+          "passed": 1,
+          "failed": 0
+        },
+        {
+          "name": "Reinforcement Boost (no data)",
+          "ms": 0.04,
+          "assertions": 1,
+          "passed": 1,
+          "failed": 0
+        },
+        {
+          "name": "Reinforcement Boost Cap",
+          "ms": 0.03,
+          "assertions": 1,
+          "passed": 1,
+          "failed": 0
+        },
+        {
+          "name": "Self-Contestation Drag",
+          "ms": 0.03,
+          "assertions": 2,
+          "passed": 2,
+          "failed": 0
+        },
+        {
+          "name": "External Contestation Drag",
+          "ms": 0.1,
+          "assertions": 1,
+          "passed": 1,
+          "failed": 0
+        },
+        {
+          "name": "Combined Contestation",
+          "ms": 0.04,
+          "assertions": 1,
+          "passed": 1,
+          "failed": 0
+        },
+        {
+          "name": "Verified Memory",
+          "ms": 0.07,
+          "assertions": 2,
+          "passed": 2,
+          "failed": 0
+        },
+        {
+          "name": "Floor Clamp (0.0)",
+          "ms": 0.03,
+          "assertions": 1,
+          "passed": 1,
+          "failed": 0
+        },
+        {
+          "name": "Ceiling Clamp (1.0)",
+          "ms": 0.03,
+          "assertions": 1,
+          "passed": 1,
+          "failed": 0
+        },
+        {
+          "name": "Spec Decay Profile Validation",
+          "ms": 0.06,
+          "assertions": 3,
+          "passed": 3,
+          "failed": 0
+        },
+        {
           "name": "Edge: null last_accessed_at",
-          "ms": 0.24,
+          "ms": 0.1,
           "assertions": 2,
           "passed": 2,
           "failed": 0
@@ -215,8 +215,8 @@
     },
     {
       "suite": "integration",
-      "timestamp": "2026-03-06T14:59:09.355Z",
-      "total_ms": 4799.39,
+      "timestamp": "2026-03-06T17:31:27.383Z",
+      "total_ms": 5001.86,
       "assertions": {
         "passed": 33,
         "failed": 0,
@@ -225,84 +225,84 @@
       "sections": [
         {
           "name": "Tool Registration",
-          "ms": 7.13,
+          "ms": 7.1,
           "assertions": 2,
           "passed": 2,
           "failed": 0
         },
         {
           "name": "orient",
-          "ms": 74.18,
+          "ms": 81.99,
           "assertions": 3,
           "passed": 3,
           "failed": 0
         },
         {
           "name": "log_disposition",
-          "ms": 1824.5,
+          "ms": 1852.39,
           "assertions": 4,
           "passed": 4,
           "failed": 0
         },
         {
           "name": "recall_recent",
-          "ms": 57.6,
+          "ms": 54.96,
           "assertions": 4,
           "passed": 4,
           "failed": 0
         },
         {
           "name": "recall_unresolved",
-          "ms": 19.6,
+          "ms": 19.28,
           "assertions": 2,
           "passed": 2,
           "failed": 0
         },
         {
           "name": "recall_salient",
-          "ms": 109.23,
+          "ms": 121.02,
           "assertions": 3,
           "passed": 3,
           "failed": 0
         },
         {
           "name": "recall_search",
-          "ms": 200.47,
+          "ms": 275.85,
           "assertions": 3,
           "passed": 3,
           "failed": 0
         },
         {
           "name": "contest_memory",
-          "ms": 9.42,
+          "ms": 11.22,
           "assertions": 4,
           "passed": 4,
           "failed": 0
         },
         {
           "name": "effective_salience (algorithm verification)",
-          "ms": 63.57,
+          "ms": 85.1,
           "assertions": 2,
           "passed": 2,
           "failed": 0
         },
         {
           "name": "resolve_tension",
-          "ms": 12.15,
+          "ms": 12.81,
           "assertions": 2,
           "passed": 2,
           "failed": 0
         },
         {
           "name": "recall_unresolved (post-resolve)",
-          "ms": 5.52,
+          "ms": 7.64,
           "assertions": 1,
           "passed": 1,
           "failed": 0
         },
         {
           "name": "close_session",
-          "ms": 2021.87,
+          "ms": 2025.67,
           "assertions": 3,
           "passed": 3,
           "failed": 0
@@ -501,8 +501,8 @@
     },
     {
       "suite": "trust-score",
-      "timestamp": "2026-03-06T14:59:01.958Z",
-      "total_ms": 3.04,
+      "timestamp": "2026-03-06T17:00:24.403Z",
+      "total_ms": 0.98,
       "assertions": {
         "passed": 7,
         "failed": 0,
@@ -511,42 +511,42 @@
       "sections": [
         {
           "name": "No Data (New Agent)",
-          "ms": 0.49,
+          "ms": 0.13,
           "assertions": 1,
           "passed": 1,
           "failed": 0
         },
         {
           "name": "Good Reputation",
-          "ms": 0.19,
+          "ms": 0.05,
           "assertions": 1,
           "passed": 1,
           "failed": 0
         },
         {
           "name": "Critical Penalty",
-          "ms": 0.3,
+          "ms": 0.03,
           "assertions": 1,
           "passed": 1,
           "failed": 0
         },
         {
           "name": "Floor (0.05)",
-          "ms": 0.36,
+          "ms": 0.13,
           "assertions": 1,
           "passed": 1,
           "failed": 0
         },
         {
           "name": "Ceiling (1.0)",
-          "ms": 0.29,
+          "ms": 0.04,
           "assertions": 2,
           "passed": 2,
           "failed": 0
         },
         {
           "name": "Spec Example",
-          "ms": 0.24,
+          "ms": 0.06,
           "assertions": 1,
           "passed": 1,
           "failed": 0
