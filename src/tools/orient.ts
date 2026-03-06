@@ -3,32 +3,17 @@ import type sql from "mssql/msnodesqlv8.js";
 import type { AppConfig } from "../config.js";
 import { orientSchema } from "../types/schemas.js";
 import { SessionRepository } from "../db/repositories/session.repository.js";
-import {
-  MemoryRepository,
-  type RecalledMemory,
-} from "../db/repositories/memory.repository.js";
+import { MemoryRepository } from "../db/repositories/memory.repository.js";
 import { AgentRepository } from "../db/repositories/agent.repository.js";
 import { AccessRepository } from "../db/repositories/access.repository.js";
 import {
   getCurrentSessionId,
   setCurrentSessionId,
 } from "./session-state.js";
-
-function formatMemories(memories: RecalledMemory[], callingAgentId: string) {
-  return memories.map((m) => ({
-    memory_id: m.memory_id,
-    source: m.agent_id === callingAgentId ? "self" : m.agent_id,
-    entry: m.entry,
-    memory_type: m.memory_type,
-    confidence: m.confidence,
-    valence: m.valence,
-    effective_salience: m.salience,
-    tension: m.tension,
-    orientation: m.orientation,
-    created_at: m.created_at,
-    tags: m.tags ? m.tags.split(",") : [],
-  }));
-}
+import {
+  computeAndRank,
+  formatEnrichedMemories,
+} from "./_salience-helpers.js";
 
 export function registerOrient(
   server: McpServer,
@@ -116,20 +101,25 @@ export function registerOrient(
         }
       }
 
-      // ── 4. Get unresolved tensions (own) ────────────────────────
+      // ── 4. Get unresolved tensions (own, ranked by effective salience)
       const halfLimit = Math.ceil(limit / 2);
-      const unresolvedTensions = await memoryRepo.recallUnresolved(
+      const unresolvedEnriched = await memoryRepo.recallUnresolvedEnriched(
         agentId,
         "self",
         halfLimit,
         0
       );
+      const unresolvedTensions = computeAndRank(unresolvedEnriched, halfLimit);
 
-      // ── 5. Get salient contributed (from others) ────────────────
+      // ── 5. Get salient contributed (from others, ranked by effective salience)
       const contributedLimit = Math.max(limit - unresolvedTensions.length, 1);
-      const salientContributed = await memoryRepo.recallSalient(
+      const contributedEnriched = await memoryRepo.recallSalientEnriched(
         agentId,
         "others",
+        contributedLimit
+      );
+      const salientContributed = computeAndRank(
+        contributedEnriched,
         contributedLimit
       );
 
@@ -158,11 +148,11 @@ export function registerOrient(
               model_transition: modelTransition,
               last_session_summary: lastSessionSummary,
               last_session_valence: lastSessionValence,
-              unresolved_tensions: formatMemories(
+              unresolved_tensions: formatEnrichedMemories(
                 unresolvedTensions,
                 agentId
               ),
-              salient_contributed: formatMemories(
+              salient_contributed: formatEnrichedMemories(
                 salientContributed,
                 agentId
               ).map((m) => ({

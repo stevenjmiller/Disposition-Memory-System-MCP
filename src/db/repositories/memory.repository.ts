@@ -30,6 +30,18 @@ export interface RecalledMemory {
   tags: string | null;
 }
 
+/** RecalledMemory + all component data needed for effective salience computation. */
+export interface EnrichedMemory extends RecalledMemory {
+  is_verified: boolean;
+  access_count: number;
+  last_accessed_at: Date | null;
+  distinct_reinforcing_agents: number;
+  author_trust_score: number;
+  /** JSON array of {confidence, severity} from SQL Server FOR JSON PATH, or null */
+  external_contestations_json: string | null;
+  self_contestation_confidence: number | null;
+}
+
 export class MemoryRepository {
   constructor(private pool: sql.ConnectionPool) {}
 
@@ -343,6 +355,134 @@ export class MemoryRepository {
         ${typeFilter}
       ORDER BY m.salience DESC, m.created_at DESC
     `);
+
+    return result.recordset;
+  }
+
+  // ── Enriched Recall (for effective salience computation) ──────────
+
+  /**
+   * SELECT columns + LEFT JOINs that supply every component
+   * the effective-salience algorithm needs.
+   *
+   * Adds: is_verified, access_count, last_accessed_at,
+   *       distinct_reinforcing_agents, author_trust_score,
+   *       external_contestations_json, self_contestation_confidence
+   */
+  private get enrichedRecallColumns(): string {
+    return `
+      m.memory_id, m.agent_id, m.entry, m.memory_type,
+      m.confidence, m.valence, m.salience,
+      m.tension, m.orientation, m.is_resolved,
+      ISNULL(m.is_verified, 0) AS is_verified,
+      m.created_at,
+      (SELECT STRING_AGG(ct.tag_name, ',')
+       FROM memory_context_tags mct
+       JOIN context_tags ct ON ct.tag_id = mct.tag_id
+       WHERE mct.memory_id = m.memory_id) AS tags,
+      ISNULL(mas.access_count, 0) AS access_count,
+      mas.last_accessed_at,
+      ISNULL(mr_agg.distinct_reinforcing_agents, 0) AS distinct_reinforcing_agents,
+      ISNULL(ats.trust_score, 0.500) AS author_trust_score,
+      (SELECT mc.confidence, mc.severity
+       FROM memory_contestations mc
+       WHERE mc.memory_id = m.memory_id
+         AND mc.is_self_contestation = 0
+       FOR JSON PATH) AS external_contestations_json,
+      (SELECT MAX(mc.confidence)
+       FROM memory_contestations mc
+       WHERE mc.memory_id = m.memory_id
+         AND mc.is_self_contestation = 1) AS self_contestation_confidence
+    `;
+  }
+
+  /** FROM/JOIN clause fragment for enriched queries. */
+  private get enrichedFromClause(): string {
+    return `
+      FROM memories m
+      LEFT JOIN memory_access_summary mas ON mas.memory_id = m.memory_id
+      LEFT JOIN (
+        SELECT source_memory_id,
+               COUNT(DISTINCT reinforcing_agent_id) AS distinct_reinforcing_agents
+        FROM memory_reinforcements
+        GROUP BY source_memory_id
+      ) mr_agg ON mr_agg.source_memory_id = m.memory_id
+      LEFT JOIN agent_trust_scores ats ON ats.agent_id = m.agent_id
+    `;
+  }
+
+  /**
+   * Salient memories with full enrichment for effective-salience computation.
+   * Oversamples by 3× so the caller can rerank after computing effective_salience.
+   */
+  async recallSalientEnriched(
+    agentId: string,
+    scope: string,
+    limit: number,
+    memoryType?: string,
+    includeResolved?: boolean
+  ): Promise<EnrichedMemory[]> {
+    const scopeClause = this.getScopeClause(scope);
+    const typeFilter = memoryType
+      ? `AND m.memory_type = @memory_type`
+      : "";
+    const resolvedFilter = includeResolved
+      ? ""
+      : `AND m.is_resolved = 0`;
+
+    const oversample = limit * 3;
+
+    const request = this.pool
+      .request()
+      .input("agent_id", sql.UniqueIdentifier, agentId)
+      .input("limit", sql.Int, oversample);
+
+    if (memoryType) {
+      request.input("memory_type", sql.VarChar(30), memoryType);
+    }
+
+    const result = await request.query(`
+      SELECT TOP (@limit) ${this.enrichedRecallColumns}
+      ${this.enrichedFromClause}
+      WHERE ${scopeClause}
+        AND m.is_quarantined = 0
+        ${resolvedFilter}
+        ${typeFilter}
+      ORDER BY m.salience DESC, m.created_at DESC
+    `);
+
+    return result.recordset;
+  }
+
+  /**
+   * Unresolved tensions with full enrichment for effective-salience computation.
+   * Oversamples by 3× so the caller can rerank after computing effective_salience.
+   */
+  async recallUnresolvedEnriched(
+    agentId: string,
+    scope: string,
+    limit: number,
+    minSalience: number
+  ): Promise<EnrichedMemory[]> {
+    const scopeClause = this.getScopeClause(scope);
+
+    const oversample = limit * 3;
+
+    const result = await this.pool
+      .request()
+      .input("agent_id", sql.UniqueIdentifier, agentId)
+      .input("limit", sql.Int, oversample)
+      .input("min_salience", sql.Decimal(3, 2), minSalience)
+      .query(`
+        SELECT TOP (@limit) ${this.enrichedRecallColumns}
+        ${this.enrichedFromClause}
+        WHERE ${scopeClause}
+          AND m.is_quarantined = 0
+          AND m.is_resolved = 0
+          AND m.tension IS NOT NULL
+          AND m.salience >= @min_salience
+        ORDER BY m.salience DESC, m.created_at DESC
+      `);
 
     return result.recordset;
   }
