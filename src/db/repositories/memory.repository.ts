@@ -30,16 +30,21 @@ export interface RecalledMemory {
   tags: string | null;
 }
 
-/** RecalledMemory + all component data needed for effective salience computation. */
+/** RecalledMemory + all component data needed for effective salience + presentation. */
 export interface EnrichedMemory extends RecalledMemory {
   is_verified: boolean;
   access_count: number;
   last_accessed_at: Date | null;
   distinct_reinforcing_agents: number;
   author_trust_score: number;
-  /** JSON array of {confidence, severity} from SQL Server FOR JSON PATH, or null */
+  /** JSON array of {confidence, severity, reason, agent_name, agent_role, created_at} or null */
   external_contestations_json: string | null;
-  self_contestation_confidence: number | null;
+  /** JSON object {confidence, severity, reason, created_at} or null */
+  self_contestation_json: string | null;
+  /** Author's display name from agents table */
+  author_name: string;
+  /** Author's role from agents table */
+  author_role: string | null;
 }
 
 export class MemoryRepository {
@@ -119,8 +124,11 @@ export class MemoryRepository {
   /**
    * Build the scoping WHERE clause fragment.
    * - self:   own memories only (any visibility)
-   * - others: contributed memories from active, non-quarantined agents
+   * - others: contributed memories from non-quarantined/disabled agents
    * - all:    union of self + others
+   *
+   * Note: suspended agents' memories ARE visible (with normal decay).
+   * Only quarantined and disabled agents' memories are excluded.
    */
   private getScopeClause(scope: string): string {
     switch (scope) {
@@ -133,7 +141,8 @@ export class MemoryRepository {
           AND m.is_quarantined = 0
           AND EXISTS (
             SELECT 1 FROM agents a
-            WHERE a.agent_id = m.agent_id AND a.status = 'active'
+            WHERE a.agent_id = m.agent_id
+              AND a.status NOT IN ('quarantined', 'disabled')
           )
         )`;
       case "all":
@@ -146,7 +155,8 @@ export class MemoryRepository {
             AND m.is_quarantined = 0
             AND EXISTS (
               SELECT 1 FROM agents a
-              WHERE a.agent_id = m.agent_id AND a.status = 'active'
+              WHERE a.agent_id = m.agent_id
+                AND a.status NOT IN ('quarantined', 'disabled')
             )
           )
         )`;
@@ -363,11 +373,13 @@ export class MemoryRepository {
 
   /**
    * SELECT columns + LEFT JOINs that supply every component
-   * the effective-salience algorithm needs.
+   * the effective-salience algorithm and presentation layer need.
    *
-   * Adds: is_verified, access_count, last_accessed_at,
-   *       distinct_reinforcing_agents, author_trust_score,
-   *       external_contestations_json, self_contestation_confidence
+   * Algorithm data: is_verified, access_count, last_accessed_at,
+   *   distinct_reinforcing_agents, author_trust_score
+   * Presentation data: author_name, author_role,
+   *   external_contestations_json (with reason/agent info),
+   *   self_contestation_json (full object)
    */
   private get enrichedRecallColumns(): string {
     return `
@@ -384,15 +396,21 @@ export class MemoryRepository {
       mas.last_accessed_at,
       ISNULL(mr_agg.distinct_reinforcing_agents, 0) AS distinct_reinforcing_agents,
       ISNULL(ats.trust_score, 0.500) AS author_trust_score,
-      (SELECT mc.confidence, mc.severity
+      auth_agent.agent_name AS author_name,
+      auth_agent.agent_role AS author_role,
+      (SELECT mc.confidence, mc.severity, mc.reason,
+              ca.agent_name, ca.agent_role, mc.created_at
        FROM memory_contestations mc
+       JOIN agents ca ON ca.agent_id = mc.contesting_agent_id
        WHERE mc.memory_id = m.memory_id
          AND mc.is_self_contestation = 0
        FOR JSON PATH) AS external_contestations_json,
-      (SELECT MAX(mc.confidence)
+      (SELECT TOP 1 mc.reason, mc.confidence, mc.severity, mc.created_at
        FROM memory_contestations mc
        WHERE mc.memory_id = m.memory_id
-         AND mc.is_self_contestation = 1) AS self_contestation_confidence
+         AND mc.is_self_contestation = 1
+       ORDER BY mc.confidence DESC
+       FOR JSON PATH, WITHOUT_ARRAY_WRAPPER) AS self_contestation_json
     `;
   }
 
@@ -408,6 +426,7 @@ export class MemoryRepository {
         GROUP BY source_memory_id
       ) mr_agg ON mr_agg.source_memory_id = m.memory_id
       LEFT JOIN agent_trust_scores ats ON ats.agent_id = m.agent_id
+      LEFT JOIN agents auth_agent ON auth_agent.agent_id = m.agent_id
     `;
   }
 
@@ -483,6 +502,120 @@ export class MemoryRepository {
           AND m.salience >= @min_salience
         ORDER BY m.salience DESC, m.created_at DESC
       `);
+
+    return result.recordset;
+  }
+
+  /**
+   * Reverse chronological memories with enrichment for presentation.
+   * No oversampling — order is by created_at, not salience.
+   */
+  async recallRecentEnriched(
+    agentId: string,
+    scope: string,
+    limit: number,
+    sessionId?: string
+  ): Promise<EnrichedMemory[]> {
+    const scopeClause = this.getScopeClause(scope);
+    const sessionFilter = sessionId
+      ? `AND m.session_id = @session_id`
+      : "";
+
+    const request = this.pool
+      .request()
+      .input("agent_id", sql.UniqueIdentifier, agentId)
+      .input("limit", sql.Int, limit);
+
+    if (sessionId) {
+      request.input("session_id", sql.UniqueIdentifier, sessionId);
+    }
+
+    const result = await request.query(`
+      SELECT TOP (@limit) ${this.enrichedRecallColumns}
+      ${this.enrichedFromClause}
+      WHERE ${scopeClause}
+        AND m.is_quarantined = 0
+        ${sessionFilter}
+      ORDER BY m.created_at DESC
+    `);
+
+    return result.recordset;
+  }
+
+  /**
+   * Keyword/tag/text search with enrichment for presentation.
+   * No oversampling — order is by raw salience + created_at.
+   */
+  async recallSearchEnriched(
+    agentId: string,
+    scope: string,
+    keywords: string[],
+    operator: string,
+    limit: number,
+    fromDate?: string,
+    toDate?: string,
+    memoryType?: string
+  ): Promise<EnrichedMemory[]> {
+    const scopeClause = this.getScopeClause(scope);
+
+    const dateFilters: string[] = [];
+    if (fromDate) dateFilters.push(`m.created_at >= @from_date`);
+    if (toDate) dateFilters.push(`m.created_at <= @to_date`);
+    const dateClause =
+      dateFilters.length > 0 ? `AND ${dateFilters.join(" AND ")}` : "";
+
+    const typeFilter = memoryType
+      ? `AND m.memory_type = @memory_type`
+      : "";
+
+    const keywordConditions = keywords.map(
+      (_, i) => `(
+        EXISTS (
+          SELECT 1 FROM memory_context_tags mct
+          JOIN context_tags ct ON ct.tag_id = mct.tag_id
+          WHERE mct.memory_id = m.memory_id
+            AND ct.tag_name LIKE @kw_${i}
+        )
+        OR EXISTS (
+          SELECT 1 FROM memory_keywords mk
+          JOIN keywords k ON k.keyword_id = mk.keyword_id
+          WHERE mk.memory_id = m.memory_id
+            AND k.keyword LIKE @kw_${i}
+        )
+        OR m.entry LIKE @kw_${i}
+      )`
+    );
+
+    const keywordClause =
+      operator === "AND"
+        ? keywordConditions.join(" AND ")
+        : keywordConditions.join(" OR ");
+
+    const request = this.pool
+      .request()
+      .input("agent_id", sql.UniqueIdentifier, agentId)
+      .input("limit", sql.Int, limit);
+
+    keywords.forEach((kw, i) => {
+      request.input(`kw_${i}`, sql.NVarChar(200), `%${kw}%`);
+    });
+
+    if (fromDate)
+      request.input("from_date", sql.DateTime2, new Date(fromDate));
+    if (toDate) request.input("to_date", sql.DateTime2, new Date(toDate));
+    if (memoryType)
+      request.input("memory_type", sql.VarChar(30), memoryType);
+
+    const result = await request.query(`
+      SELECT TOP (@limit) ${this.enrichedRecallColumns}
+      ${this.enrichedFromClause}
+      WHERE ${scopeClause}
+        AND m.is_quarantined = 0
+        AND (${keywordClause})
+        ${dateClause}
+        ${typeFilter}
+      ORDER BY m.salience DESC, m.created_at DESC
+    `);
 
     return result.recordset;
   }

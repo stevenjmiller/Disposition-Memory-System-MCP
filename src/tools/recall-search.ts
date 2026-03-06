@@ -2,28 +2,12 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type sql from "mssql/msnodesqlv8.js";
 import type { AppConfig } from "../config.js";
 import { recallSearchSchema } from "../types/schemas.js";
-import {
-  MemoryRepository,
-  type RecalledMemory,
-} from "../db/repositories/memory.repository.js";
+import { MemoryRepository } from "../db/repositories/memory.repository.js";
 import { AccessRepository } from "../db/repositories/access.repository.js";
-
-function formatMemories(memories: RecalledMemory[], callingAgentId: string) {
-  return memories.map((m) => ({
-    memory_id: m.memory_id,
-    source: m.agent_id === callingAgentId ? "self" : m.agent_id,
-    entry: m.entry,
-    memory_type: m.memory_type,
-    confidence: m.confidence,
-    valence: m.valence,
-    effective_salience: m.salience,
-    tension: m.tension,
-    orientation: m.orientation,
-    is_resolved: m.is_resolved,
-    created_at: m.created_at,
-    tags: m.tags ? m.tags.split(",") : [],
-  }));
-}
+import {
+  computeSalience,
+  formatEnrichedMemories,
+} from "./_salience-helpers.js";
 
 export function registerRecallSearch(
   server: McpServer,
@@ -41,7 +25,7 @@ export function registerRecallSearch(
     async (args) => {
       const agentId = config.agentId;
 
-      const memories = await memoryRepo.recallSearch(
+      const enriched = await memoryRepo.recallSearchEnriched(
         agentId,
         args.scope ?? "all",
         args.keywords,
@@ -52,14 +36,17 @@ export function registerRecallSearch(
         args.memory_type
       );
 
+      // Compute effective salience without re-sorting (maintain relevance order)
+      const ranked = computeSalience(enriched);
+
       // Log accesses
-      const ids = memories.map((m) => m.memory_id);
+      const ids = ranked.map((m) => m.memory_id);
       if (ids.length > 0) {
         await accessRepo.logBulkAccess(ids, agentId, "search");
       }
 
       console.error(
-        `[recall_search] Returned ${memories.length} memories for keywords=[${args.keywords.join(", ")}] ` +
+        `[recall_search] Returned ${ranked.length} memories for keywords=[${args.keywords.join(", ")}] ` +
           `(operator=${args.operator ?? "OR"}, scope=${args.scope ?? "all"})`
       );
 
@@ -68,8 +55,8 @@ export function registerRecallSearch(
           {
             type: "text" as const,
             text: JSON.stringify({
-              memories: formatMemories(memories, agentId),
-              count: memories.length,
+              memories: formatEnrichedMemories(ranked, agentId),
+              count: ranked.length,
               keywords: args.keywords,
               operator: args.operator ?? "OR",
               scope: args.scope ?? "all",

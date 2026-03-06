@@ -10,7 +10,8 @@
     "dev": "tsx src/index.ts",
     "inspect": "npx @modelcontextprotocol/inspector tsx src/index.ts",
     "test": "npm run build && tsx test/integration.ts",
-    "test:unit": "tsx test/algorithms/effective-salience.test.ts && tsx test/algorithms/trust-score.test.ts"
+    "test:unit": "tsx test/algorithms/effective-salience.test.ts && tsx test/algorithms/trust-score.test.ts && tsx test/algorithms/decay-profiles.test.ts",
+    "test:presentation": "npm run build && tsx test/presentation.test.ts"
   },
   "engines": {
     "node": ">=20.0.0"
