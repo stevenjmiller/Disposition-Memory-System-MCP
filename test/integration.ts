@@ -8,36 +8,16 @@
 
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
+import { TestHarness, parseResult } from "./helpers/test-harness.js";
 
-// ── Helpers ─────────────────────────────────────────────────────────
-
-let passed = 0;
-let failed = 0;
-
-function assert(condition: boolean, message: string): void {
-  if (!condition) {
-    console.error(`  ❌ FAIL: ${message}`);
-    failed++;
-  } else {
-    console.log(`  ✅ ${message}`);
-    passed++;
-  }
-}
-
-function parseResult(result: { content: Array<{ type: string; text?: string }> }): unknown {
-  const textContent = result.content.find((c) => c.type === "text");
-  if (!textContent || !textContent.text) {
-    throw new Error("No text content in result");
-  }
-  return JSON.parse(textContent.text);
-}
+const t = new TestHarness(
+  "integration",
+  "\uD83E\uDDEA Disposition Memory System \u2014 Integration Test"
+);
 
 // ── Main Test Runner ────────────────────────────────────────────────
 
 async function main(): Promise<void> {
-  console.log("\n🧪 Disposition Memory System — Integration Test\n");
-  console.log("═".repeat(55));
-
   // Spawn the MCP server
   const transport = new StdioClientTransport({
     command: "node",
@@ -54,9 +34,9 @@ async function main(): Promise<void> {
   console.log("Connected to MCP server via stdio\n");
 
   // ── 1. List Tools ───────────────────────────────────────────────
-  console.log("── Tool Registration ──");
+  t.section("Tool Registration");
   const { tools } = await client.listTools();
-  assert(tools.length === 9, `9 tools registered (got ${tools.length})`);
+  t.assert(tools.length === 9, `9 tools registered (got ${tools.length})`);
   const toolNames = tools.map((t) => t.name).sort();
   const expected = [
     "close_session",
@@ -69,13 +49,13 @@ async function main(): Promise<void> {
     "recall_unresolved",
     "resolve_tension",
   ];
-  assert(
+  t.assert(
     JSON.stringify(toolNames) === JSON.stringify(expected),
     `Tool names match: ${toolNames.join(", ")}`
   );
 
   // ── 2. Orient ───────────────────────────────────────────────────
-  console.log("\n── orient ──");
+  t.section("orient");
   const orientResult = parseResult(
     await client.callTool({
       name: "orient",
@@ -90,25 +70,25 @@ async function main(): Promise<void> {
     salient_contributed: unknown[];
   };
 
-  assert(!!orientResult.session_id, `Session created: ${orientResult.session_id}`);
-  assert(
+  t.assert(!!orientResult.session_id, `Session created: ${orientResult.session_id}`);
+  t.assert(
     Array.isArray(orientResult.unresolved_tensions),
     `unresolved_tensions is array (${orientResult.unresolved_tensions.length} items)`
   );
-  assert(
+  t.assert(
     Array.isArray(orientResult.salient_contributed),
     `salient_contributed is array (${orientResult.salient_contributed.length} items)`
   );
   const sessionId = orientResult.session_id;
 
   // ── 3. Log Disposition ──────────────────────────────────────────
-  console.log("\n── log_disposition ──");
+  t.section("log_disposition");
   const logResult = parseResult(
     await client.callTool({
       name: "log_disposition",
       arguments: {
         entry:
-          "Integration test memory — verifying the full MCP tool pipeline works end-to-end.",
+          "Integration test memory \u2014 verifying the full MCP tool pipeline works end-to-end.",
         memory_type: "observation",
         confidence: 0.85,
         valence: "positive",
@@ -121,9 +101,9 @@ async function main(): Promise<void> {
     })
   ) as { memory_id: string; status: string; you_should_know: unknown[] };
 
-  assert(!!logResult.memory_id, `Memory logged: ${logResult.memory_id}`);
-  assert(logResult.status === "logged", `Status is "logged"`);
-  assert(
+  t.assert(!!logResult.memory_id, `Memory logged: ${logResult.memory_id}`);
+  t.assert(logResult.status === "logged", `Status is "logged"`);
+  t.assert(
     Array.isArray(logResult.you_should_know),
     `you_should_know is array`
   );
@@ -135,7 +115,7 @@ async function main(): Promise<void> {
       name: "log_disposition",
       arguments: {
         entry:
-          "Second test memory — a decision with high confidence and no tension.",
+          "Second test memory \u2014 a decision with high confidence and no tension.",
         memory_type: "decision",
         confidence: 0.95,
         valence: "neutral",
@@ -145,11 +125,11 @@ async function main(): Promise<void> {
     })
   ) as { memory_id: string; status: string };
 
-  assert(!!log2Result.memory_id, `Second memory logged: ${log2Result.memory_id}`);
+  t.assert(!!log2Result.memory_id, `Second memory logged: ${log2Result.memory_id}`);
   const secondMemoryId = log2Result.memory_id;
 
   // ── 4. Recall Recent ────────────────────────────────────────────
-  console.log("\n── recall_recent ──");
+  t.section("recall_recent");
   const recentResult = parseResult(
     await client.callTool({
       name: "recall_recent",
@@ -157,13 +137,13 @@ async function main(): Promise<void> {
     })
   ) as { memories: Array<{ memory_id: string; source: string }>; count: number };
 
-  assert(recentResult.count >= 2, `At least 2 recent memories (got ${recentResult.count})`);
+  t.assert(recentResult.count >= 2, `At least 2 recent memories (got ${recentResult.count})`);
   const recentIds = recentResult.memories.map((m) => m.memory_id);
-  assert(
+  t.assert(
     recentIds.includes(testMemoryId),
     `Test memory ${testMemoryId.substring(0, 8)}... in recent results`
   );
-  assert(
+  t.assert(
     recentResult.memories.every((m) => m.source === "self"),
     `All memories scoped to "self"`
   );
@@ -176,13 +156,13 @@ async function main(): Promise<void> {
     })
   ) as { memories: Array<{ memory_id: string }>; count: number };
 
-  assert(
+  t.assert(
     recentSessionResult.count >= 2,
     `Session filter returned ${recentSessionResult.count} memories for current session`
   );
 
   // ── 5. Recall Unresolved ────────────────────────────────────────
-  console.log("\n── recall_unresolved ──");
+  t.section("recall_unresolved");
   const unresolvedResult = parseResult(
     await client.callTool({
       name: "recall_unresolved",
@@ -190,17 +170,17 @@ async function main(): Promise<void> {
     })
   ) as { memories: Array<{ memory_id: string; tension: string | null }>; count: number };
 
-  assert(
+  t.assert(
     unresolvedResult.count >= 1,
     `At least 1 unresolved tension (got ${unresolvedResult.count})`
   );
-  assert(
+  t.assert(
     unresolvedResult.memories.every((m) => m.tension !== null),
     `All returned memories have non-null tension`
   );
 
   // ── 6. Recall Salient ───────────────────────────────────────────
-  console.log("\n── recall_salient ──");
+  t.section("recall_salient");
   const salientResult = parseResult(
     await client.callTool({
       name: "recall_salient",
@@ -208,7 +188,7 @@ async function main(): Promise<void> {
     })
   ) as { memories: Array<{ memory_id: string; effective_salience: number }>; count: number };
 
-  assert(
+  t.assert(
     salientResult.count >= 1,
     `At least 1 salient memory (got ${salientResult.count})`
   );
@@ -217,7 +197,7 @@ async function main(): Promise<void> {
   const isDescending = saliences.every(
     (s, i) => i === 0 || s <= saliences[i - 1]
   );
-  assert(isDescending, `Memories sorted by salience DESC`);
+  t.assert(isDescending, `Memories sorted by salience DESC`);
 
   // Test memory_type filter
   const salientDecisions = parseResult(
@@ -228,16 +208,16 @@ async function main(): Promise<void> {
   ) as { memories: Array<{ memory_type: string }>; count: number };
 
   if (salientDecisions.count > 0) {
-    assert(
+    t.assert(
       salientDecisions.memories.every((m) => m.memory_type === "decision"),
       `memory_type filter works (all are "decision")`
     );
   } else {
-    console.log("  ⏭️  No decisions found — filter test skipped");
+    console.log("  \u23ED\uFE0F  No decisions found \u2014 filter test skipped");
   }
 
   // ── 7. Recall Search ────────────────────────────────────────────
-  console.log("\n── recall_search ──");
+  t.section("recall_search");
 
   // Search by tag
   const searchTagResult = parseResult(
@@ -247,9 +227,9 @@ async function main(): Promise<void> {
     })
   ) as { memories: Array<{ memory_id: string; tags: string[] }>; count: number };
 
-  assert(
+  t.assert(
     searchTagResult.count >= 2,
-    `Tag search "integration-test" found ${searchTagResult.count} memories (expected ≥2)`
+    `Tag search "integration-test" found ${searchTagResult.count} memories (expected \u22652)`
   );
 
   // Search by entry text
@@ -260,7 +240,7 @@ async function main(): Promise<void> {
     })
   ) as { count: number };
 
-  assert(
+  t.assert(
     searchTextResult.count >= 1,
     `Text search "pipeline" found ${searchTextResult.count} memories`
   );
@@ -277,13 +257,13 @@ async function main(): Promise<void> {
     })
   ) as { count: number };
 
-  assert(
+  t.assert(
     searchAndResult.count >= 1,
-    `AND search ["integration-test", "decisions"] found ${searchAndResult.count} (expected ≥1)`
+    `AND search ["integration-test", "decisions"] found ${searchAndResult.count} (expected \u22651)`
   );
 
   // ── 8. Contest Memory ───────────────────────────────────────────
-  console.log("\n── contest_memory ──");
+  t.section("contest_memory");
 
   const contestResult = parseResult(
     await client.callTool({
@@ -302,12 +282,12 @@ async function main(): Promise<void> {
     original_entry: string;
   };
 
-  assert(!!contestResult.contestation_id, `Contestation created: ${contestResult.contestation_id}`);
-  assert(
+  t.assert(!!contestResult.contestation_id, `Contestation created: ${contestResult.contestation_id}`);
+  t.assert(
     contestResult.is_self_contestation === true,
     `Self-contestation detected`
   );
-  assert(
+  t.assert(
     contestResult.status === "self_contested",
     `Status is "self_contested"`
   );
@@ -323,15 +303,14 @@ async function main(): Promise<void> {
     })
   ) as { error: string };
 
-  assert(
+  t.assert(
     contestBadResult.error === "memory_not_found",
     `Non-existent memory returns "memory_not_found"`
   );
 
   // ── 8b. Effective Salience Algorithm ────────────────────────────
-  console.log("\n── effective_salience (algorithm verification) ──");
+  t.section("effective_salience (algorithm verification)");
 
-  // Recall salient and verify effective_salience is a computed number
   const salientAfterContest = parseResult(
     await client.callTool({
       name: "recall_salient",
@@ -345,8 +324,7 @@ async function main(): Promise<void> {
     count: number;
   };
 
-  // All memories must have a numeric effective_salience in [0, 1]
-  assert(
+  t.assert(
     salientAfterContest.memories.every(
       (m) =>
         typeof m.effective_salience === "number" &&
@@ -356,8 +334,6 @@ async function main(): Promise<void> {
     `All memories have effective_salience in [0, 1]`
   );
 
-  // The contested memory should have lower effective_salience than the uncontested one
-  // (testMemoryId was self-contested with confidence 0.8 → drag = 0.24)
   const contestedMem = salientAfterContest.memories.find(
     (m) => m.memory_id === testMemoryId
   );
@@ -366,30 +342,29 @@ async function main(): Promise<void> {
   );
 
   if (contestedMem && uncontestedMem) {
-    assert(
+    t.assert(
       contestedMem.effective_salience < uncontestedMem.effective_salience ||
         contestedMem.effective_salience < 0.7,
       `Self-contested memory has reduced effective_salience ` +
         `(${contestedMem.effective_salience.toFixed(4)} < raw 0.7)`
     );
   } else {
-    console.log("  ⏭️  Could not find both memories for contestation impact test");
+    console.log("  \u23ED\uFE0F  Could not find both memories for contestation impact test");
   }
 
-  // Verify descending order is by effective_salience
   const postContestSaliences = salientAfterContest.memories.map(
     (m) => m.effective_salience
   );
   const postContestDescending = postContestSaliences.every(
     (s, i) => i === 0 || s <= postContestSaliences[i - 1]
   );
-  assert(
+  t.assert(
     postContestDescending,
     `Post-contest: memories sorted by effective_salience DESC`
   );
 
   // ── 9. Resolve Tension ──────────────────────────────────────────
-  console.log("\n── resolve_tension ──");
+  t.section("resolve_tension");
 
   const resolveResult = parseResult(
     await client.callTool({
@@ -401,7 +376,7 @@ async function main(): Promise<void> {
     })
   ) as { status: string; memory_id: string };
 
-  assert(
+  t.assert(
     resolveResult.status === "resolved",
     `Tension resolved on ${testMemoryId.substring(0, 8)}...`
   );
@@ -414,14 +389,14 @@ async function main(): Promise<void> {
     })
   ) as { error?: string; status?: string };
 
-  assert(
+  t.assert(
     resolveAgainResult.error === "already_resolved" ||
       resolveAgainResult.status === "already_resolved",
     `Double-resolve returns already_resolved`
   );
 
   // ── 10. Recall Unresolved (should not include resolved) ─────────
-  console.log("\n── recall_unresolved (post-resolve) ──");
+  t.section("recall_unresolved (post-resolve)");
   const unresolvedAfter = parseResult(
     await client.callTool({
       name: "recall_unresolved",
@@ -432,27 +407,27 @@ async function main(): Promise<void> {
   const resolvedStillPresent = unresolvedAfter.memories.some(
     (m) => m.memory_id === testMemoryId
   );
-  assert(
+  t.assert(
     !resolvedStillPresent,
     `Resolved memory no longer in unresolved list`
   );
 
   // ── 11. Close Session ───────────────────────────────────────────
-  console.log("\n── close_session ──");
+  t.section("close_session");
 
   const closeResult = parseResult(
     await client.callTool({
       name: "close_session",
       arguments: {
         summary:
-          "Integration test session — all 9 tools tested successfully.",
+          "Integration test session \u2014 all 9 tools tested successfully.",
         outcome_valence: "positive",
       },
     })
   ) as { status: string; session_id: string; summary: string };
 
-  assert(closeResult.status === "session_closed", `Session closed`);
-  assert(
+  t.assert(closeResult.status === "session_closed", `Session closed`);
+  t.assert(
     closeResult.session_id === sessionId,
     `Closed session matches orient session`
   );
@@ -468,20 +443,13 @@ async function main(): Promise<void> {
     })
   ) as { error?: string };
 
-  assert(
+  t.assert(
     closeAgainResult.error === "no_open_session",
     `Double-close returns "no_open_session"`
   );
 
-  // ── Results ─────────────────────────────────────────────────────
-  console.log("\n" + "═".repeat(55));
-  console.log(`\n📊 Results: ${passed} passed, ${failed} failed\n`);
-
   await client.close();
-
-  if (failed > 0) {
-    process.exit(1);
-  }
+  t.finish();
 }
 
 main().catch((err) => {

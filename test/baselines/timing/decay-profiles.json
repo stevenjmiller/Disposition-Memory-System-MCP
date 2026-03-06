@@ -1,0 +1,68 @@
+{
+  "suite": "decay-profiles",
+  "timestamp": "2026-03-06T14:59:02.231Z",
+  "total_ms": 3.89,
+  "assertions": {
+    "passed": 31,
+    "failed": 0,
+    "total": 31
+  },
+  "sections": [
+    {
+      "name": "Scenario 1: Resolved action, conf=0.3 (fastest decay)",
+      "ms": 0.63,
+      "assertions": 5,
+      "passed": 5,
+      "failed": 0
+    },
+    {
+      "name": "Scenario 2: Resolved observation, conf=0.5 (baseline)",
+      "ms": 0.5,
+      "assertions": 4,
+      "passed": 4,
+      "failed": 0
+    },
+    {
+      "name": "Scenario 3: Resolved decision, conf=0.9 (moderate retention)",
+      "ms": 0.25,
+      "assertions": 4,
+      "passed": 4,
+      "failed": 0
+    },
+    {
+      "name": "Scenario 4: Unresolved tension, negative valence (slow decay)",
+      "ms": 0.37,
+      "assertions": 5,
+      "passed": 5,
+      "failed": 0
+    },
+    {
+      "name": "Scenario 5: Unresolved blocker, conf=0.9 (slowest decay)",
+      "ms": 0.45,
+      "assertions": 5,
+      "passed": 5,
+      "failed": 0
+    },
+    {
+      "name": "Cross-Scenario Ordering",
+      "ms": 0.19,
+      "assertions": 3,
+      "passed": 3,
+      "failed": 0
+    },
+    {
+      "name": "Decay Rate Ordering",
+      "ms": 0.28,
+      "assertions": 3,
+      "passed": 3,
+      "failed": 0
+    },
+    {
+      "name": "Floor Clamping",
+      "ms": 0.21,
+      "assertions": 2,
+      "passed": 2,
+      "failed": 0
+    }
+  ]
+}

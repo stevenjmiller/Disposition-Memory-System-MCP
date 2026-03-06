@@ -1,0 +1,54 @@
+{
+  "suite": "trust-score",
+  "timestamp": "2026-03-06T14:59:01.958Z",
+  "total_ms": 3.04,
+  "assertions": {
+    "passed": 7,
+    "failed": 0,
+    "total": 7
+  },
+  "sections": [
+    {
+      "name": "No Data (New Agent)",
+      "ms": 0.49,
+      "assertions": 1,
+      "passed": 1,
+      "failed": 0
+    },
+    {
+      "name": "Good Reputation",
+      "ms": 0.19,
+      "assertions": 1,
+      "passed": 1,
+      "failed": 0
+    },
+    {
+      "name": "Critical Penalty",
+      "ms": 0.3,
+      "assertions": 1,
+      "passed": 1,
+      "failed": 0
+    },
+    {
+      "name": "Floor (0.05)",
+      "ms": 0.36,
+      "assertions": 1,
+      "passed": 1,
+      "failed": 0
+    },
+    {
+      "name": "Ceiling (1.0)",
+      "ms": 0.29,
+      "assertions": 2,
+      "passed": 2,
+      "failed": 0
+    },
+    {
+      "name": "Spec Example",
+      "ms": 0.24,
+      "assertions": 1,
+      "passed": 1,
+      "failed": 0
+    }
+  ]
+}

@@ -11,12 +11,16 @@
     "inspect": "npx @modelcontextprotocol/inspector tsx src/index.ts",
     "test": "npm run build && tsx test/integration.ts",
     "test:unit": "tsx test/algorithms/effective-salience.test.ts && tsx test/algorithms/trust-score.test.ts && tsx test/algorithms/decay-profiles.test.ts",
-    "test:presentation": "npm run build && tsx test/presentation.test.ts"
+    "test:presentation": "npm run build && tsx test/presentation.test.ts",
+    "test:ai": "tsx test/ai/keyword-extraction.test.ts && tsx test/ai/reactive-recall.test.ts",
+    "test:perf": "tsx test/ai/perf-baseline.test.ts",
+    "test:snapshot": "npm run test:unit && npm run test && npm run test:presentation && npm run test:ai && tsx test/snapshot.ts"
   },
   "engines": {
     "node": ">=20.0.0"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.78.0",
     "@modelcontextprotocol/sdk": "^1.12.1",
     "dotenv": "^16.4.7",
     "msnodesqlv8": "^5.0.2",
