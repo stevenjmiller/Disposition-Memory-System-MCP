@@ -1,0 +1,82 @@
+{
+  "suite": "reactive-recall",
+  "timestamp": "2026-03-06T14:59:16.648Z",
+  "total_ms": 497.99,
+  "assertions": {
+    "passed": 37,
+    "failed": 0,
+    "total": 37
+  },
+  "sections": [
+    {
+      "name": "Test 1: Basic keyword match",
+      "ms": 32.74,
+      "assertions": 3,
+      "passed": 3,
+      "failed": 0
+    },
+    {
+      "name": "Test 2: Multiple keyword ranking",
+      "ms": 37.53,
+      "assertions": 6,
+      "passed": 6,
+      "failed": 0
+    },
+    {
+      "name": "Test 3: Scoping — non-contributed excluded",
+      "ms": 4.99,
+      "assertions": 1,
+      "passed": 1,
+      "failed": 0
+    },
+    {
+      "name": "Test 4: Quarantined agent exclusion",
+      "ms": 33.09,
+      "assertions": 1,
+      "passed": 1,
+      "failed": 0
+    },
+    {
+      "name": "Test 5: Self-exclusion",
+      "ms": 33.85,
+      "assertions": 2,
+      "passed": 2,
+      "failed": 0
+    },
+    {
+      "name": "Test 6: Limit enforcement",
+      "ms": 30.43,
+      "assertions": 2,
+      "passed": 2,
+      "failed": 0
+    },
+    {
+      "name": "Test 7: Response format (Section 12.2)",
+      "ms": 6.52,
+      "assertions": 15,
+      "passed": 15,
+      "failed": 0
+    },
+    {
+      "name": "Test 8: No keywords → empty result",
+      "ms": 0.08,
+      "assertions": 1,
+      "passed": 1,
+      "failed": 0
+    },
+    {
+      "name": "Test 9: Non-existent keywords → empty result",
+      "ms": 33.23,
+      "assertions": 1,
+      "passed": 1,
+      "failed": 0
+    },
+    {
+      "name": "Test 10: matching_keywords field accuracy",
+      "ms": 111.72,
+      "assertions": 5,
+      "passed": 5,
+      "failed": 0
+    }
+  ]
+}

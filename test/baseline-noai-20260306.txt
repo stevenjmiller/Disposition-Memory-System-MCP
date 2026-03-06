@@ -1,0 +1,663 @@
+c:\Projects\Disposition-Memory-System-MCP>npm run test:snapshot
+
+> disposition-memory-mcp@1.0.0 test:snapshot
+> npm run test:unit && npm run test && npm run test:presentation && npm run test:ai && tsx test/snapshot.ts
+
+
+> disposition-memory-mcp@1.0.0 test:unit
+> tsx test/algorithms/effective-salience.test.ts && tsx test/algorithms/trust-score.test.ts && tsx test/algorithms/decay-profiles.test.ts
+
+
+🧪 Effective Salience Algorithm — Unit Tests
+
+════════════════════════════════════════════════════════════
+
+── Fresh Memory (age=0) ──
+  ✅ Fresh memory ≈ raw salience (0.700000)
+  ✅ Time factor = 1.0 at age 0 (1.000000)
+  ✅ Access boost = 0 with no accesses
+  ✅ Reinforcement boost = 0 with no reinforcements
+  ✅ Contestation drag = 0 with no contestations
+
+── Time Decay (30 days) ──
+  ✅ 30-day decay reduces salience (0.3818 < 0.7)
+  ✅ Decay rate for resolved observation = 0.980 (0.980000)
+  ✅ Time factor ≈ 0.980^30 (0.545484)
+
+── Unresolved Tension Slows Decay ──
+  ✅ Unresolved tension retains more salience at 90d (0.3397 > 0.1136)
+  ✅ Unresolved-with-tension decay rate ≈ 0.992 (0.992000)
+
+── Memory Type Effects ──
+  ✅ Blocker retains more than action at 60d (0.5845 > 0.1532)
+  ✅ Action decay rate (0.9750) < blocker (0.9970)
+
+── Access Boost ──
+  ✅ Access boost increases salience (0.5017 > 0.3818)
+  ✅ Access boost > 0 (0.1199)
+
+── Access Boost Recency Brackets ──
+  ✅ Recent (≤7d) boost 0.1522 > mid (≤30d) 0.0913
+  ✅ Mid (≤30d) boost 0.0913 > old (≤90d) 0.0457
+  ✅ Old (≤90d) boost 0.0457 > stale (>90d) 0.0152
+
+── Access Boost Cap ──
+  ✅ Access boost capped at 0.25 (got 0.2500)
+
+── Reinforcement Boost ──
+  ✅ R_boost = 3 × 0.08 × 0.8 = 0.192 (0.192000)
+
+── Reinforcement Boost (no data) ──
+  ✅ R_boost = 0 when no reinforcing agents
+
+── Reinforcement Boost Cap ──
+  ✅ R_boost capped at 0.25 (got 0.2500)
+
+── Self-Contestation Drag ──
+  ✅ Self-drag = 0.8 × 0.30 = 0.24 (0.240000)
+  ✅ Salience reduced by self-drag (0.460000)
+
+── External Contestation Drag ──
+  ✅ External drag = 0.06 × (0.7×1.0 + 0.6×0.5) (0.060000)
+
+── Combined Contestation ──
+  ✅ Combined drag = 0.1080 + 0.2100 (0.318000)
+
+── Verified Memory ──
+  ✅ Verified memory retains more at 180d (0.9000 > 0.0237)
+  ✅ Verified memory ≈ raw salience (no decay) (0.900000)
+
+── Floor Clamp (0.0) ──
+  ✅ Salience floor at 0.0 (got 0)
+
+── Ceiling Clamp (1.0) ──
+  ✅ Salience ceiling at 1.0 (got 1)
+
+── Spec Decay Profile Validation ──
+  ✅ Resolved action decay < 0.98 (got 0.9738)
+  ✅ Unresolved blocker decay ≥ 0.995 (got 0.9980)
+  ✅ Unresolved blocker retains more than resolved action at 30d
+
+── Edge: null last_accessed_at ──
+  ✅ Access boost still computed with null last_accessed_at (0.0090)
+  ✅ Uses stale recency multiplier (0.1) (0.008959)
+
+────────────────────────────────────────────────────────────
+⏱️  Section Timing:
+────────────────────────────────────────────────────────────
+  Fresh Memory (age=0)                 1ms     5/5 passed
+  Time Decay (30 days)                 0ms     3/3 passed
+  Unresolved Tension Slows Decay       0ms     2/2 passed
+  Memory Type Effects                  0ms     2/2 passed
+  Access Boost                         0ms     2/2 passed
+  Access Boost Recency Brackets        0ms     3/3 passed
+  Access Boost Cap                     0ms     1/1 passed
+  Reinforcement Boost                  0ms     1/1 passed
+  Reinforcement Boost (no data)        0ms     1/1 passed
+  Reinforcement Boost Cap              0ms     1/1 passed
+  Self-Contestation Drag               0ms     2/2 passed
+  External Contestation Drag           0ms     1/1 passed
+  Combined Contestation                0ms     1/1 passed
+  Verified Memory                      0ms     2/2 passed
+  Floor Clamp (0.0)                    0ms     1/1 passed
+  Ceiling Clamp (1.0)                  0ms     1/1 passed
+  Spec Decay Profile Validation        0ms     3/3 passed
+  Edge: null last_accessed_at          0ms     2/2 passed
+────────────────────────────────────────────────────────────
+  TOTAL                                5ms   34/34 passed
+
+════════════════════════════════════════════════════════════
+
+📊 Results: 34 passed, 0 failed (5ms)
+
+
+🧪 Trust Score Algorithm — Unit Tests
+
+════════════════════════════════════════════════════════════
+
+── No Data (New Agent) ──
+  ✅ New agent gets floor trust (0.05) (0.050000)
+
+── Good Reputation ──
+  ✅ Good agent: 20E/3C → trust ≈ 0.833 (0.833333)
+
+── Critical Penalty ──
+  ✅ 2 critical flags: trust = base - 0.30 (0.533333)
+
+── Floor (0.05) ──
+  ✅ Heavy contestation → floor (0.05)
+
+── Ceiling (1.0) ──
+  ✅ Ceiling enforced (0.999001)
+  ✅ High endorsements → near 1.0 (0.999001)
+
+── Spec Example ──
+  ✅ Spec example: 20E/3C/1K → trust ≈ 0.683 (0.683333)
+
+────────────────────────────────────────────────────────────
+⏱️  Section Timing:
+────────────────────────────────────────────────────────────
+  No Data (New Agent)       0ms     1/1 passed
+  Good Reputation           0ms     1/1 passed
+  Critical Penalty          0ms     1/1 passed
+  Floor (0.05)              0ms     1/1 passed
+  Ceiling (1.0)             0ms     2/2 passed
+  Spec Example              0ms     1/1 passed
+────────────────────────────────────────────────────────────
+  TOTAL                     2ms     7/7 passed
+
+════════════════════════════════════════════════════════════
+
+📊 Results: 7 passed, 0 failed (2ms)
+
+
+🧪 Decay Profiles (Spec Section 5.9) — Unit Tests
+
+════════════════════════════════════════════════════════════
+
+── Scenario 1: Resolved action, conf=0.3 (fastest decay) ──
+  ✅ D = 0.9738 (action + low conf) (0.973800)
+  ✅ 30-day retention (0.450913)
+  ✅ 90-day retention (0.091681)
+  ✅ 180-day retention (0.008405)
+  ✅ 30d retention 0.4509 < 0.5 (decays quickly)
+
+── Scenario 2: Resolved observation, conf=0.5 (baseline) ──
+  ✅ D = 0.980 (baseline observation) (0.980000)
+  ✅ 30-day retention (0.545484)
+  ✅ 90-day retention (0.162311)
+  ✅ 180-day retention (0.026345)
+
+── Scenario 3: Resolved decision, conf=0.9 (moderate retention) ──
+  ✅ D = 0.9854 (decision + high conf) (0.985400)
+  ✅ 30-day retention (0.643245)
+  ✅ 90-day retention (0.266152)
+  ✅ 180-day retention (0.070837)
+
+── Scenario 4: Unresolved tension, negative valence (slow decay) ──
+  ✅ D = 0.995 (unresolved + tension + negative) (0.995000)
+  ✅ 30-day retention (0.860384)
+  ✅ 90-day retention (0.636909)
+  ✅ 180-day retention (0.405653)
+  ✅ 90d retention 0.6369 > 0.6 (decays slowly)
+
+── Scenario 5: Unresolved blocker, conf=0.9 (slowest decay) ──
+  ✅ D = 0.998 (clamped ceiling) (0.998000)
+  ✅ 30-day retention (0.941708)
+  ✅ 90-day retention (0.835120)
+  ✅ 180-day retention (0.697425)
+  ✅ 180d retention 0.6974 > 0.65 (persists)
+
+── Cross-Scenario Ordering ──
+  ✅ 30d ordering: blocker(0.942) > neg_tension(0.860) > decision(0.643) > observation(0.545) > action(0.451)
+  ✅ 90d ordering: blocker(0.835) > neg_tension(0.637) > decision(0.266) > observation(0.162) > action(0.092)
+  ✅ 180d ordering: blocker(0.697) > neg_tension(0.406) > decision(0.071) > observation(0.026) > action(0.008)
+
+── Decay Rate Ordering ──
+  ✅ D ordering: blocker(0.998) > neg_tension(0.995) > decision(0.9853999999999999) > observation(0.98) > action(0.9738)
+  ✅ Action D=0.9738 in [0.96, 0.998]
+  ✅ Blocker D=0.998 in [0.96, 0.998]
+
+── Floor Clamping ──
+  ✅ Action conf=0 D=0.972 (above floor) (0.972000)
+  ✅ D=0.972 >= floor 0.96
+
+────────────────────────────────────────────────────────────
+⏱️  Section Timing:
+────────────────────────────────────────────────────────────
+  Scenario 1: Resolved action, conf=0.3 (fastest decay)               1ms     5/5 passed
+  Scenario 2: Resolved observation, conf=0.5 (baseline)               1ms     4/4 passed
+  Scenario 3: Resolved decision, conf=0.9 (moderate retention)        0ms     4/4 passed
+  Scenario 4: Unresolved tension, negative valence (slow decay)       0ms     5/5 passed
+  Scenario 5: Unresolved blocker, conf=0.9 (slowest decay)            0ms     5/5 passed
+  Cross-Scenario Ordering                                             0ms     3/3 passed
+  Decay Rate Ordering                                                 0ms     3/3 passed
+  Floor Clamping                                                      0ms     2/2 passed
+────────────────────────────────────────────────────────────
+  TOTAL                                                               4ms   31/31 passed
+
+════════════════════════════════════════════════════════════
+
+📊 Results: 31 passed, 0 failed (4ms)
+
+
+> disposition-memory-mcp@1.0.0 test
+> npm run build && tsx test/integration.ts
+
+
+> disposition-memory-mcp@1.0.0 build
+> tsc
+
+
+🧪 Disposition Memory System — Integration Test
+
+════════════════════════════════════════════════════════════
+[MCP] Starting Disposition Memory System...
+[MCP] Agent ID: AE354D0D-9C31-4CAF-8798-074C8A0A6767
+[MCP] Model: claude-sonnet-4-5
+[DB] Connected to localhost\SQLEXPRESS / DispositionMemory
+[MCP] Agent verified: Agent-Dev (active)
+[MCP] All 9 tools registered
+[MCP] Server connected via stdio transport
+Connected to MCP server via stdio
+
+
+── Tool Registration ──
+  ✅ 9 tools registered (got 9)
+  ✅ Tool names match: close_session, contest_memory, log_disposition, orient, recall_recent, recall_salient, recall_search, recall_unresolved, resolve_tension
+
+── orient ──
+[orient] Session 2799F2DB-F6BF-4BDE-8871-C3EBE3758BF2: 1 unresolved tensions, 0 contributed memories
+  ✅ Session created: 2799F2DB-F6BF-4BDE-8871-C3EBE3758BF2
+  ✅ unresolved_tensions is array (1 items)
+  ✅ salient_contributed is array (0 items)
+
+── log_disposition ──
+[log_disposition] Memory logged: E6E34421-2746-4972-B151-CE79D5620284 (observation, confidence=0.85, valence=positive, salience=0.7)
+[log_disposition] Subsystem AI disabled — skipping keyword extraction
+  ✅ Memory logged: E6E34421-2746-4972-B151-CE79D5620284
+  ✅ Status is "logged"
+  ✅ you_should_know is array
+[log_disposition] Memory logged: B9AFF385-BE7D-40E3-903C-017B8C84F518 (decision, confidence=0.95, valence=neutral, salience=0.5)
+[log_disposition] Subsystem AI disabled — skipping keyword extraction
+  ✅ Second memory logged: B9AFF385-BE7D-40E3-903C-017B8C84F518
+
+── recall_recent ──
+[recall_recent] Returned 5 memories (scope=self)
+  ✅ At least 2 recent memories (got 5)
+  ✅ Test memory E6E34421... in recent results
+  ✅ All memories scoped to "self"
+[recall_recent] Returned 2 memories (scope=self)
+  ✅ Session filter returned 2 memories for current session
+
+── recall_unresolved ──
+[recall_unresolved] Returned 2 unresolved tensions (scope=self, min_salience=0)
+  ✅ At least 1 unresolved tension (got 2)
+  ✅ All returned memories have non-null tension
+
+── recall_salient ──
+[recall_salient] Returned 10 memories (scope=all, include_resolved=false)
+  ✅ At least 1 salient memory (got 10)
+  ✅ Memories sorted by salience DESC
+[recall_salient] Returned 10 memories (scope=self, include_resolved=true)
+  ✅ memory_type filter works (all are "decision")
+
+── recall_search ──
+[recall_search] Returned 20 memories for keywords=[integration-test] (operator=OR, scope=self)
+  ✅ Tag search "integration-test" found 20 memories (expected ≥2)
+[recall_search] Returned 11 memories for keywords=[pipeline] (operator=OR, scope=self)
+  ✅ Text search "pipeline" found 11 memories
+[recall_search] Returned 11 memories for keywords=[integration-test, decisions] (operator=AND, scope=self)
+  ✅ AND search ["integration-test", "decisions"] found 11 (expected ≥1)
+
+── contest_memory ──
+[contest_memory] Contestation 6AFB1098-D3EE-4D72-BE16-51BE6367AB38 on memory E6E34421-2746-4972-B151-CE79D5620284 (self, severity=minor)
+  ✅ Contestation created: 6AFB1098-D3EE-4D72-BE16-51BE6367AB38
+  ✅ Self-contestation detected
+  ✅ Status is "self_contested"
+  ✅ Non-existent memory returns "memory_not_found"
+
+── effective_salience (algorithm verification) ──
+[recall_salient] Returned 20 memories (scope=self, include_resolved=true)
+  ✅ All memories have effective_salience in [0, 1]
+  ⏭️  Could not find both memories for contestation impact test
+  ✅ Post-contest: memories sorted by effective_salience DESC
+
+── resolve_tension ──
+[resolve_tension] Memory E6E34421-2746-4972-B151-CE79D5620284 marked as resolved
+  ✅ Tension resolved on E6E34421...
+  ✅ Double-resolve returns already_resolved
+
+── recall_unresolved (post-resolve) ──
+[recall_unresolved] Returned 1 unresolved tensions (scope=self, min_salience=0)
+  ✅ Resolved memory no longer in unresolved list
+
+── close_session ──
+[close_session] Session 2799F2DB-F6BF-4BDE-8871-C3EBE3758BF2 closed with valence: positive
+  ✅ Session closed
+  ✅ Closed session matches orient session
+  ✅ Double-close returns "no_open_session"
+
+────────────────────────────────────────────────────────────
+⏱️  Section Timing:
+────────────────────────────────────────────────────────────
+  Tool Registration                                 6ms     2/2 passed
+  orient                                           77ms     3/3 passed
+  log_disposition                                  27ms     4/4 passed
+  recall_recent                                    53ms     4/4 passed
+  recall_unresolved                                15ms     2/2 passed
+  recall_salient                                   97ms     3/3 passed
+  recall_search                                   170ms     3/3 passed
+  contest_memory                                   10ms     4/4 passed
+  effective_salience (algorithm verification)      52ms     2/2 passed
+  resolve_tension                                  11ms     2/2 passed
+  recall_unresolved (post-resolve)                  6ms     1/1 passed
+  close_session                                   2.02s     3/3 passed
+────────────────────────────────────────────────────────────
+  TOTAL                                           2.93s   33/33 passed
+
+════════════════════════════════════════════════════════════
+
+📊 Results: 33 passed, 0 failed (2.93s)
+
+
+> disposition-memory-mcp@1.0.0 test:presentation
+> npm run build && tsx test/presentation.test.ts
+
+
+> disposition-memory-mcp@1.0.0 build
+> tsc
+
+
+🧪 Presentation & Scoping — Integration Tests
+
+════════════════════════════════════════════════════════════
+Direct SQL connection established
+
+[MCP] Starting Disposition Memory System...
+[MCP] Agent ID: AE354D0D-9C31-4CAF-8798-074C8A0A6767
+[MCP] Model: claude-sonnet-4-5
+[DB] Connected to localhost\SQLEXPRESS / DispositionMemory
+[MCP] Agent verified: Agent-Dev (active)
+[MCP] All 9 tools registered
+[MCP] Server connected via stdio transport
+Connected to MCP server via stdio
+
+
+── Orient Response Structure ──
+[orient] Session 4645DA3F-B01A-4E84-972B-D1380E2A10D9: 1 unresolved tensions, 3 contributed memories
+  ✅ Orient has session_id
+  ✅ Orient has unresolved_tensions array
+  ✅ Orient has salient_contributed array
+  ✅ Orient has last_session_summary field
+  ✅ Orient has model_transition field
+
+── Non-self Memory Presentation ──
+  ✅ source is agent name "Helper-Agent" (got "Helper-Agent")
+  ✅ source_role is "advisor" (got "advisor")
+  ✅ Non-self memory has "their_confidence"
+  ✅ Non-self memory does NOT have "confidence"
+  ✅ Non-self memory has perspective note
+
+── Self-Contested Memory Presentation ──
+[recall_recent] Returned 20 memories (scope=self)
+  ✅ Self-memory source is "self" (got "self")
+  ✅ Self-contested memory has status="self-contested" (got "self-contested")
+  ✅ Self-contested memory has self_contestation block
+  ✅ Self-contestation reason is correct
+  ✅ Self-contestation confidence = 0.75
+  ✅ Self-contestation severity = "significant"
+  ✅ Self-contestation has contested_at timestamp
+  ✅ Self-memory has "confidence" (not "their_confidence")
+  ✅ Self-memory does NOT have perspective note
+
+── Externally Contested Memory Presentation ──
+[recall_search] Returned 1 memories for keywords=[presentation-test, externally contested] (operator=AND, scope=all)
+  ✅ Externally contested memory has status="contested" (got "contested")
+  ✅ Has contestations array with 1 entry
+  ✅ Contestation reason is correct
+  ✅ Contestation confidence = 0.80
+  ✅ Contestation severity = "significant"
+  ✅ Contestation has "by" (agent name)
+
+── Trust Score Never Leaked ──
+[recall_recent] Returned 20 memories (scope=all)
+[recall_salient] Returned 20 memories (scope=all, include_resolved=true)
+[recall_unresolved] Returned 1 unresolved tensions (scope=all, min_salience=0)
+[recall_search] Returned 5 memories for keywords=[presentation-test] (operator=OR, scope=all)
+  ✅ No 'author_trust_score' in any response
+  ✅ No 'trust_score' in any response
+
+── Scoping: Quarantined Agent Hidden ──
+[recall_search] Returned 5 memories for keywords=[presentation-test] (operator=OR, scope=all)
+  ✅ Quarantined agent's memory is NOT in results
+
+── Scoping: Suspended Agent Visible ──
+[recall_search] Returned 1 memories for keywords=[presentation-test, deployment risks] (operator=AND, scope=all)
+  ✅ Suspended agent's memory IS visible (got match)
+  ✅ Suspended agent source is name "Suspended-Agent" (got "Suspended-Agent")
+
+── Scoping: Default recall_recent scope=self ──
+[recall_recent] Returned 25 memories (scope=self)
+  ✅ Default scope is "self" (got "self")
+  ✅ All recall_recent (default) memories are from self
+
+── Effective Salience in Responses ──
+[recall_recent] Returned 5 memories (scope=self)
+  ✅ All recall_recent memories have numeric effective_salience
+
+MCP client closed
+Test data cleaned up
+
+────────────────────────────────────────────────────────────
+⏱️  Section Timing:
+────────────────────────────────────────────────────────────
+  Orient Response Structure                      24ms     5/5 passed
+  Non-self Memory Presentation                    0ms     5/5 passed
+  Self-Contested Memory Presentation             44ms     9/9 passed
+  Externally Contested Memory Presentation       52ms     6/6 passed
+  Trust Score Never Leaked                      236ms     2/2 passed
+  Scoping: Quarantined Agent Hidden              15ms     1/1 passed
+  Scoping: Suspended Agent Visible               47ms     2/2 passed
+  Scoping: Default recall_recent scope=self      48ms     2/2 passed
+  Effective Salience in Responses               2.11s     1/1 passed
+────────────────────────────────────────────────────────────
+  TOTAL                                         3.07s   33/33 passed
+
+════════════════════════════════════════════════════════════
+
+📊 Results: 33 passed, 0 failed (3.07s)
+
+
+> disposition-memory-mcp@1.0.0 test:ai
+> tsx test/ai/keyword-extraction.test.ts && tsx test/ai/reactive-recall.test.ts
+
+
+🧪 Keyword Extraction — Unit Tests
+
+════════════════════════════════════════════════════════════
+
+── normalizeKeywords() ──
+  ✅ Mixed case normalized to lowercase
+  ✅ Leading/trailing whitespace trimmed
+  ✅ Empty and whitespace-only strings removed
+  ✅ Case-insensitive deduplication
+  ✅ Cap at 10 (got 10 from 15 input)
+  ✅ Keywords > 100 chars rejected
+  ✅ Empty input returns empty array
+  ✅ All-invalid input returns empty array
+
+── extractKeywords() — disabled mode ──
+  ✅ Disabled mode returns { skipped: true }
+  ✅ skipped property is true
+
+── extractKeywords() — invalid API key ──
+[subsystem-ai] Keyword extraction failed: 401 {"type":"error","error":{"type":"authentication_error","message":"invalid x-api-key"},"request_id":"req_011CYn1FQRo24dk51ngRtTn3"}
+  ✅ Invalid API key returns { error: "..." } (not exception)
+  ✅ Error message is a string
+
+────────────────────────────────────────────────────────────
+⏱️  Section Timing:
+────────────────────────────────────────────────────────────
+  normalizeKeywords()                       1ms     8/8 passed
+  extractKeywords() — disabled mode         0ms     2/2 passed
+  extractKeywords() — invalid API key     242ms     2/2 passed
+────────────────────────────────────────────────────────────
+  TOTAL                                   244ms   12/12 passed
+
+════════════════════════════════════════════════════════════
+
+📊 Results: 12 passed, 0 failed (244ms)
+
+
+🧪 Reactive Recall — Integration Tests
+
+════════════════════════════════════════════════════════════
+Database connection established
+
+
+── Test 1: Basic keyword match ──
+  ✅ At least one memory matches 'rr-deployment'
+  ✅ Contributor 1's 3-match memory found in results
+  ✅ Contributor 2's 2-match memory found in results
+
+── Test 2: Multiple keyword ranking ──
+  ✅ At least 2 results (got 2)
+  ✅ 3-match memory present in results
+  ✅ 2-match memory present in results
+  ✅ 3-match memory (idx=0) ranks above 2-match (idx=1)
+  ✅ 3-match memory has matching_keyword_count=3 (got 3)
+  ✅ 2-match memory has matching_keyword_count >= 1 (got 1)
+
+── Test 3: Scoping — non-contributed excluded ──
+  ✅ Internal-only memory is NOT in results
+
+── Test 4: Quarantined agent exclusion ──
+  ✅ Quarantined agent's memory is NOT in results
+
+── Test 5: Self-exclusion ──
+  ✅ Caller's own contributed memory is NOT in results (agent_id exclusion)
+  ✅ Just-logged memory excluded via exclude_memory_id
+
+── Test 6: Limit enforcement ──
+  ✅ Results capped at 5 (got 5)
+  ✅ Exactly 5 returned from 6 available (got 5)
+
+── Test 7: Response format (Section 12.2) ──
+  ✅ Results available for format test
+  ✅ Formatted output is non-empty
+  ✅ Has memory_id
+  ✅ Has source (agent name): "Contributor-Agent"
+  ✅ Source is never "self" for reactive recall (got "Contributor-Agent")
+  ✅ Has source_role
+  ✅ Has entry (string)
+  ✅ Has their_confidence (not 'confidence')
+  ✅ Does NOT have bare 'confidence'
+  ✅ Has numeric effective_salience (0.7499999656241509)
+  ✅ Has matching_keywords as array
+  ✅ matching_keywords is non-empty: [rr-deployment, rr-kubernetes, rr-rollback]
+  ✅ Has perspective note
+  ✅ author_trust_score NOT in formatted output
+  ✅ trust_score NOT in formatted output
+
+── Test 8: No keywords → empty result ──
+  ✅ Empty keywords returns empty array (got 0)
+
+── Test 9: Non-existent keywords → empty result ──
+  ✅ Non-matching keywords returns empty array (got 0)
+
+── Test 10: matching_keywords field accuracy ──
+  ✅ 3-match memory has non-null matching_keywords
+  ✅ 3-match memory has 3 matching keywords in string (got 3)
+  ✅ matching_keywords includes 'rr-deployment'
+  ✅ matching_keywords includes 'rr-kubernetes'
+  ✅ matching_keywords includes 'rr-rollback'
+
+Test data cleaned up
+
+────────────────────────────────────────────────────────────
+⏱️  Section Timing:
+────────────────────────────────────────────────────────────
+  Test 1: Basic keyword match                       32ms     3/3 passed
+  Test 2: Multiple keyword ranking                  33ms     6/6 passed
+  Test 3: Scoping — non-contributed excluded         3ms     1/1 passed
+  Test 4: Quarantined agent exclusion               31ms     1/1 passed
+  Test 5: Self-exclusion                            39ms     2/2 passed
+  Test 6: Limit enforcement                         36ms     2/2 passed
+  Test 7: Response format (Section 12.2)            43ms   15/15 passed
+  Test 8: No keywords → empty result                 0ms     1/1 passed
+  Test 9: Non-existent keywords → empty result      46ms     1/1 passed
+  Test 10: matching_keywords field accuracy        298ms     5/5 passed
+────────────────────────────────────────────────────────────
+  TOTAL                                            754ms   37/37 passed
+
+════════════════════════════════════════════════════════════
+
+📊 Results: 37 passed, 0 failed (754ms)
+
+
+📸 Test Snapshot Aggregator
+
+════════════════════════════════════════════════════════════
+
+⏱️  Suite Timing Summary:
+────────────────────────────────────────────────────────────
+  ✅ decay-profiles           4ms    31/31 passed
+       Scenario 1: Resolved action, conf=0.3 (fastest decay)       1ms      5/5
+       Scenario 2: Resolved observation, conf=0.5 (baseline)       1ms      4/4
+       Scenario 3: Resolved decision, conf=0.9 (moderate retention)       0ms      4/4
+       Scenario 4: Unresolved tension, negative valence (slow decay)       0ms      5/5
+       Scenario 5: Unresolved blocker, conf=0.9 (slowest decay)       0ms      5/5
+       Cross-Scenario Ordering       0ms      3/3
+       Decay Rate Ordering       0ms      3/3
+       Floor Clamping         0ms      2/2
+  ✅ effective-salience       5ms    34/34 passed
+       Fresh Memory (age=0)       1ms      5/5
+       Time Decay (30 days)       0ms      3/3
+       Unresolved Tension Slows Decay       0ms      2/2
+       Memory Type Effects       0ms      2/2
+       Access Boost           0ms      2/2
+       Access Boost Recency Brackets       0ms      3/3
+       Access Boost Cap       0ms      1/1
+       Reinforcement Boost       0ms      1/1
+       Reinforcement Boost (no data)       0ms      1/1
+       Reinforcement Boost Cap       0ms      1/1
+       Self-Contestation Drag       0ms      2/2
+       External Contestation Drag       0ms      1/1
+       Combined Contestation       0ms      1/1
+       Verified Memory        0ms      2/2
+       Floor Clamp (0.0)       0ms      1/1
+       Ceiling Clamp (1.0)       0ms      1/1
+       Spec Decay Profile Validation       0ms      3/3
+       Edge: null last_accessed_at       0ms      2/2
+  ✅ integration            2.93s    33/33 passed
+       Tool Registration       6ms      2/2
+       orient                77ms      3/3
+       log_disposition       27ms      4/4
+       recall_recent         53ms      4/4
+       recall_unresolved      15ms      2/2
+       recall_salient        97ms      3/3
+       recall_search        170ms      3/3
+       contest_memory        10ms      4/4
+       effective_salience (algorithm verification)      52ms      2/2
+       resolve_tension       11ms      2/2
+       recall_unresolved (post-resolve)       6ms      1/1
+       close_session        2.02s      3/3
+  ✅ keyword-extraction     244ms    12/12 passed
+       normalizeKeywords()       1ms      8/8
+       extractKeywords() — disabled mode       0ms      2/2
+       extractKeywords() — invalid API key     242ms      2/2
+  ✅ presentation           3.07s    33/33 passed
+       Orient Response Structure      24ms      5/5
+       Non-self Memory Presentation       0ms      5/5
+       Self-Contested Memory Presentation      44ms      9/9
+       Externally Contested Memory Presentation      52ms      6/6
+       Trust Score Never Leaked     236ms      2/2
+       Scoping: Quarantined Agent Hidden      15ms      1/1
+       Scoping: Suspended Agent Visible      47ms      2/2
+       Scoping: Default recall_recent scope=self      48ms      2/2
+       Effective Salience in Responses     2.11s      1/1
+  ✅ reactive-recall        754ms    37/37 passed
+       Test 1: Basic keyword match      32ms      3/3
+       Test 2: Multiple keyword ranking      33ms      6/6
+       Test 3: Scoping — non-contributed excluded       3ms      1/1
+       Test 4: Quarantined agent exclusion      31ms      1/1
+       Test 5: Self-exclusion      39ms      2/2
+       Test 6: Limit enforcement      36ms      2/2
+       Test 7: Response format (Section 12.2)      43ms    15/15
+       Test 8: No keywords → empty result       0ms      1/1
+       Test 9: Non-existent keywords → empty result      46ms      1/1
+       Test 10: matching_keywords field accuracy     298ms      5/5
+  ✅ trust-score              2ms      7/7 passed
+       No Data (New Agent)       0ms      1/1
+       Good Reputation        0ms      1/1
+       Critical Penalty       0ms      1/1
+       Floor (0.05)           0ms      1/1
+       Ceiling (1.0)          0ms      2/2
+       Spec Example           0ms      1/1
+────────────────────────────────────────────────────────────
+     TOTAL                  7.01s  187/187 passed
+
+💾 Snapshot saved: test/baselines/test-snapshot.json
+
+📊 Totals: 187 passed, 0 failed across 7 suites (7.01s)

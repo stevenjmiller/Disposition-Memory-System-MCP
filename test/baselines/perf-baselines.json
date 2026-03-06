@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "updated_at": "2026-03-06T00:00:00Z",
+  "baselines": {
+    "keyword_extraction_api_call": {
+      "p50_ms": null,
+      "max_acceptable_ms": 3000
+    },
+    "keyword_extraction_with_db_write": {
+      "p50_ms": null,
+      "max_acceptable_ms": 3500
+    },
+    "reactive_recall_query": {
+      "p50_ms": null,
+      "max_acceptable_ms": 200
+    },
+    "full_log_disposition_with_ai": {
+      "p50_ms": null,
+      "max_acceptable_ms": 4000
+    }
+  }
+}

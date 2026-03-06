@@ -1,0 +1,557 @@
+{
+  "timestamp": "2026-03-06T14:59:16.925Z",
+  "total_ms": 8636.7,
+  "total_assertions": {
+    "passed": 187,
+    "failed": 0,
+    "total": 187
+  },
+  "suites": [
+    {
+      "suite": "decay-profiles",
+      "timestamp": "2026-03-06T14:59:02.231Z",
+      "total_ms": 3.89,
+      "assertions": {
+        "passed": 31,
+        "failed": 0,
+        "total": 31
+      },
+      "sections": [
+        {
+          "name": "Scenario 1: Resolved action, conf=0.3 (fastest decay)",
+          "ms": 0.63,
+          "assertions": 5,
+          "passed": 5,
+          "failed": 0
+        },
+        {
+          "name": "Scenario 2: Resolved observation, conf=0.5 (baseline)",
+          "ms": 0.5,
+          "assertions": 4,
+          "passed": 4,
+          "failed": 0
+        },
+        {
+          "name": "Scenario 3: Resolved decision, conf=0.9 (moderate retention)",
+          "ms": 0.25,
+          "assertions": 4,
+          "passed": 4,
+          "failed": 0
+        },
+        {
+          "name": "Scenario 4: Unresolved tension, negative valence (slow decay)",
+          "ms": 0.37,
+          "assertions": 5,
+          "passed": 5,
+          "failed": 0
+        },
+        {
+          "name": "Scenario 5: Unresolved blocker, conf=0.9 (slowest decay)",
+          "ms": 0.45,
+          "assertions": 5,
+          "passed": 5,
+          "failed": 0
+        },
+        {
+          "name": "Cross-Scenario Ordering",
+          "ms": 0.19,
+          "assertions": 3,
+          "passed": 3,
+          "failed": 0
+        },
+        {
+          "name": "Decay Rate Ordering",
+          "ms": 0.28,
+          "assertions": 3,
+          "passed": 3,
+          "failed": 0
+        },
+        {
+          "name": "Floor Clamping",
+          "ms": 0.21,
+          "assertions": 2,
+          "passed": 2,
+          "failed": 0
+        }
+      ]
+    },
+    {
+      "suite": "effective-salience",
+      "timestamp": "2026-03-06T14:59:01.624Z",
+      "total_ms": 3.96,
+      "assertions": {
+        "passed": 34,
+        "failed": 0,
+        "total": 34
+      },
+      "sections": [
+        {
+          "name": "Fresh Memory (age=0)",
+          "ms": 0.52,
+          "assertions": 5,
+          "passed": 5,
+          "failed": 0
+        },
+        {
+          "name": "Time Decay (30 days)",
+          "ms": 0.33,
+          "assertions": 3,
+          "passed": 3,
+          "failed": 0
+        },
+        {
+          "name": "Unresolved Tension Slows Decay",
+          "ms": 0.16,
+          "assertions": 2,
+          "passed": 2,
+          "failed": 0
+        },
+        {
+          "name": "Memory Type Effects",
+          "ms": 0.14,
+          "assertions": 2,
+          "passed": 2,
+          "failed": 0
+        },
+        {
+          "name": "Access Boost",
+          "ms": 0.17,
+          "assertions": 2,
+          "passed": 2,
+          "failed": 0
+        },
+        {
+          "name": "Access Boost Recency Brackets",
+          "ms": 0.26,
+          "assertions": 3,
+          "passed": 3,
+          "failed": 0
+        },
+        {
+          "name": "Access Boost Cap",
+          "ms": 0.09,
+          "assertions": 1,
+          "passed": 1,
+          "failed": 0
+        },
+        {
+          "name": "Reinforcement Boost",
+          "ms": 0.09,
+          "assertions": 1,
+          "passed": 1,
+          "failed": 0
+        },
+        {
+          "name": "Reinforcement Boost (no data)",
+          "ms": 0.09,
+          "assertions": 1,
+          "passed": 1,
+          "failed": 0
+        },
+        {
+          "name": "Reinforcement Boost Cap",
+          "ms": 0.08,
+          "assertions": 1,
+          "passed": 1,
+          "failed": 0
+        },
+        {
+          "name": "Self-Contestation Drag",
+          "ms": 0.13,
+          "assertions": 2,
+          "passed": 2,
+          "failed": 0
+        },
+        {
+          "name": "External Contestation Drag",
+          "ms": 0.16,
+          "assertions": 1,
+          "passed": 1,
+          "failed": 0
+        },
+        {
+          "name": "Combined Contestation",
+          "ms": 0.11,
+          "assertions": 1,
+          "passed": 1,
+          "failed": 0
+        },
+        {
+          "name": "Verified Memory",
+          "ms": 0.12,
+          "assertions": 2,
+          "passed": 2,
+          "failed": 0
+        },
+        {
+          "name": "Floor Clamp (0.0)",
+          "ms": 0.08,
+          "assertions": 1,
+          "passed": 1,
+          "failed": 0
+        },
+        {
+          "name": "Ceiling Clamp (1.0)",
+          "ms": 0.08,
+          "assertions": 1,
+          "passed": 1,
+          "failed": 0
+        },
+        {
+          "name": "Spec Decay Profile Validation",
+          "ms": 0.19,
+          "assertions": 3,
+          "passed": 3,
+          "failed": 0
+        },
+        {
+          "name": "Edge: null last_accessed_at",
+          "ms": 0.24,
+          "assertions": 2,
+          "passed": 2,
+          "failed": 0
+        }
+      ]
+    },
+    {
+      "suite": "integration",
+      "timestamp": "2026-03-06T14:59:09.355Z",
+      "total_ms": 4799.39,
+      "assertions": {
+        "passed": 33,
+        "failed": 0,
+        "total": 33
+      },
+      "sections": [
+        {
+          "name": "Tool Registration",
+          "ms": 7.13,
+          "assertions": 2,
+          "passed": 2,
+          "failed": 0
+        },
+        {
+          "name": "orient",
+          "ms": 74.18,
+          "assertions": 3,
+          "passed": 3,
+          "failed": 0
+        },
+        {
+          "name": "log_disposition",
+          "ms": 1824.5,
+          "assertions": 4,
+          "passed": 4,
+          "failed": 0
+        },
+        {
+          "name": "recall_recent",
+          "ms": 57.6,
+          "assertions": 4,
+          "passed": 4,
+          "failed": 0
+        },
+        {
+          "name": "recall_unresolved",
+          "ms": 19.6,
+          "assertions": 2,
+          "passed": 2,
+          "failed": 0
+        },
+        {
+          "name": "recall_salient",
+          "ms": 109.23,
+          "assertions": 3,
+          "passed": 3,
+          "failed": 0
+        },
+        {
+          "name": "recall_search",
+          "ms": 200.47,
+          "assertions": 3,
+          "passed": 3,
+          "failed": 0
+        },
+        {
+          "name": "contest_memory",
+          "ms": 9.42,
+          "assertions": 4,
+          "passed": 4,
+          "failed": 0
+        },
+        {
+          "name": "effective_salience (algorithm verification)",
+          "ms": 63.57,
+          "assertions": 2,
+          "passed": 2,
+          "failed": 0
+        },
+        {
+          "name": "resolve_tension",
+          "ms": 12.15,
+          "assertions": 2,
+          "passed": 2,
+          "failed": 0
+        },
+        {
+          "name": "recall_unresolved (post-resolve)",
+          "ms": 5.52,
+          "assertions": 1,
+          "passed": 1,
+          "failed": 0
+        },
+        {
+          "name": "close_session",
+          "ms": 2021.87,
+          "assertions": 3,
+          "passed": 3,
+          "failed": 0
+        }
+      ]
+    },
+    {
+      "suite": "keyword-extraction",
+      "timestamp": "2026-03-06T14:59:15.756Z",
+      "total_ms": 213.75,
+      "assertions": {
+        "passed": 12,
+        "failed": 0,
+        "total": 12
+      },
+      "sections": [
+        {
+          "name": "normalizeKeywords()",
+          "ms": 1.19,
+          "assertions": 8,
+          "passed": 8,
+          "failed": 0
+        },
+        {
+          "name": "extractKeywords() — disabled mode",
+          "ms": 0.3,
+          "assertions": 2,
+          "passed": 2,
+          "failed": 0
+        },
+        {
+          "name": "extractKeywords() — invalid API key",
+          "ms": 211.13,
+          "assertions": 2,
+          "passed": 2,
+          "failed": 0
+        }
+      ]
+    },
+    {
+      "suite": "presentation",
+      "timestamp": "2026-03-06T14:59:14.857Z",
+      "total_ms": 3114.68,
+      "assertions": {
+        "passed": 33,
+        "failed": 0,
+        "total": 33
+      },
+      "sections": [
+        {
+          "name": "Orient Response Structure",
+          "ms": 29.22,
+          "assertions": 5,
+          "passed": 5,
+          "failed": 0
+        },
+        {
+          "name": "Non-self Memory Presentation",
+          "ms": 0.3,
+          "assertions": 5,
+          "passed": 5,
+          "failed": 0
+        },
+        {
+          "name": "Self-Contested Memory Presentation",
+          "ms": 49.8,
+          "assertions": 9,
+          "passed": 9,
+          "failed": 0
+        },
+        {
+          "name": "Externally Contested Memory Presentation",
+          "ms": 49.35,
+          "assertions": 6,
+          "passed": 6,
+          "failed": 0
+        },
+        {
+          "name": "Trust Score Never Leaked",
+          "ms": 253.74,
+          "assertions": 2,
+          "passed": 2,
+          "failed": 0
+        },
+        {
+          "name": "Scoping: Quarantined Agent Hidden",
+          "ms": 15.71,
+          "assertions": 1,
+          "passed": 1,
+          "failed": 0
+        },
+        {
+          "name": "Scoping: Suspended Agent Visible",
+          "ms": 47.63,
+          "assertions": 2,
+          "passed": 2,
+          "failed": 0
+        },
+        {
+          "name": "Scoping: Default recall_recent scope=self",
+          "ms": 75.99,
+          "assertions": 2,
+          "passed": 2,
+          "failed": 0
+        },
+        {
+          "name": "Effective Salience in Responses",
+          "ms": 2107.14,
+          "assertions": 1,
+          "passed": 1,
+          "failed": 0
+        }
+      ]
+    },
+    {
+      "suite": "reactive-recall",
+      "timestamp": "2026-03-06T14:59:16.648Z",
+      "total_ms": 497.99,
+      "assertions": {
+        "passed": 37,
+        "failed": 0,
+        "total": 37
+      },
+      "sections": [
+        {
+          "name": "Test 1: Basic keyword match",
+          "ms": 32.74,
+          "assertions": 3,
+          "passed": 3,
+          "failed": 0
+        },
+        {
+          "name": "Test 2: Multiple keyword ranking",
+          "ms": 37.53,
+          "assertions": 6,
+          "passed": 6,
+          "failed": 0
+        },
+        {
+          "name": "Test 3: Scoping — non-contributed excluded",
+          "ms": 4.99,
+          "assertions": 1,
+          "passed": 1,
+          "failed": 0
+        },
+        {
+          "name": "Test 4: Quarantined agent exclusion",
+          "ms": 33.09,
+          "assertions": 1,
+          "passed": 1,
+          "failed": 0
+        },
+        {
+          "name": "Test 5: Self-exclusion",
+          "ms": 33.85,
+          "assertions": 2,
+          "passed": 2,
+          "failed": 0
+        },
+        {
+          "name": "Test 6: Limit enforcement",
+          "ms": 30.43,
+          "assertions": 2,
+          "passed": 2,
+          "failed": 0
+        },
+        {
+          "name": "Test 7: Response format (Section 12.2)",
+          "ms": 6.52,
+          "assertions": 15,
+          "passed": 15,
+          "failed": 0
+        },
+        {
+          "name": "Test 8: No keywords → empty result",
+          "ms": 0.08,
+          "assertions": 1,
+          "passed": 1,
+          "failed": 0
+        },
+        {
+          "name": "Test 9: Non-existent keywords → empty result",
+          "ms": 33.23,
+          "assertions": 1,
+          "passed": 1,
+          "failed": 0
+        },
+        {
+          "name": "Test 10: matching_keywords field accuracy",
+          "ms": 111.72,
+          "assertions": 5,
+          "passed": 5,
+          "failed": 0
+        }
+      ]
+    },
+    {
+      "suite": "trust-score",
+      "timestamp": "2026-03-06T14:59:01.958Z",
+      "total_ms": 3.04,
+      "assertions": {
+        "passed": 7,
+        "failed": 0,
+        "total": 7
+      },
+      "sections": [
+        {
+          "name": "No Data (New Agent)",
+          "ms": 0.49,
+          "assertions": 1,
+          "passed": 1,
+          "failed": 0
+        },
+        {
+          "name": "Good Reputation",
+          "ms": 0.19,
+          "assertions": 1,
+          "passed": 1,
+          "failed": 0
+        },
+        {
+          "name": "Critical Penalty",
+          "ms": 0.3,
+          "assertions": 1,
+          "passed": 1,
+          "failed": 0
+        },
+        {
+          "name": "Floor (0.05)",
+          "ms": 0.36,
+          "assertions": 1,
+          "passed": 1,
+          "failed": 0
+        },
+        {
+          "name": "Ceiling (1.0)",
+          "ms": 0.29,
+          "assertions": 2,
+          "passed": 2,
+          "failed": 0
+        },
+        {
+          "name": "Spec Example",
+          "ms": 0.24,
+          "assertions": 1,
+          "passed": 1,
+          "failed": 0
+        }
+      ]
+    }
+  ]
+}

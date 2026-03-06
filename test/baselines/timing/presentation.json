@@ -1,0 +1,75 @@
+{
+  "suite": "presentation",
+  "timestamp": "2026-03-06T14:59:14.857Z",
+  "total_ms": 3114.68,
+  "assertions": {
+    "passed": 33,
+    "failed": 0,
+    "total": 33
+  },
+  "sections": [
+    {
+      "name": "Orient Response Structure",
+      "ms": 29.22,
+      "assertions": 5,
+      "passed": 5,
+      "failed": 0
+    },
+    {
+      "name": "Non-self Memory Presentation",
+      "ms": 0.3,
+      "assertions": 5,
+      "passed": 5,
+      "failed": 0
+    },
+    {
+      "name": "Self-Contested Memory Presentation",
+      "ms": 49.8,
+      "assertions": 9,
+      "passed": 9,
+      "failed": 0
+    },
+    {
+      "name": "Externally Contested Memory Presentation",
+      "ms": 49.35,
+      "assertions": 6,
+      "passed": 6,
+      "failed": 0
+    },
+    {
+      "name": "Trust Score Never Leaked",
+      "ms": 253.74,
+      "assertions": 2,
+      "passed": 2,
+      "failed": 0
+    },
+    {
+      "name": "Scoping: Quarantined Agent Hidden",
+      "ms": 15.71,
+      "assertions": 1,
+      "passed": 1,
+      "failed": 0
+    },
+    {
+      "name": "Scoping: Suspended Agent Visible",
+      "ms": 47.63,
+      "assertions": 2,
+      "passed": 2,
+      "failed": 0
+    },
+    {
+      "name": "Scoping: Default recall_recent scope=self",
+      "ms": 75.99,
+      "assertions": 2,
+      "passed": 2,
+      "failed": 0
+    },
+    {
+      "name": "Effective Salience in Responses",
+      "ms": 2107.14,
+      "assertions": 1,
+      "passed": 1,
+      "failed": 0
+    }
+  ]
+}

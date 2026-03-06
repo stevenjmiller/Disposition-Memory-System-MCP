@@ -1,0 +1,33 @@
+{
+  "suite": "keyword-extraction",
+  "timestamp": "2026-03-06T14:59:15.756Z",
+  "total_ms": 213.75,
+  "assertions": {
+    "passed": 12,
+    "failed": 0,
+    "total": 12
+  },
+  "sections": [
+    {
+      "name": "normalizeKeywords()",
+      "ms": 1.19,
+      "assertions": 8,
+      "passed": 8,
+      "failed": 0
+    },
+    {
+      "name": "extractKeywords() — disabled mode",
+      "ms": 0.3,
+      "assertions": 2,
+      "passed": 2,
+      "failed": 0
+    },
+    {
+      "name": "extractKeywords() — invalid API key",
+      "ms": 211.13,
+      "assertions": 2,
+      "passed": 2,
+      "failed": 0
+    }
+  ]
+}

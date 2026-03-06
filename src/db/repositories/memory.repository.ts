@@ -47,6 +47,12 @@ export interface EnrichedMemory extends RecalledMemory {
   author_role: string | null;
 }
 
+/** EnrichedMemory + keyword matching metadata for reactive recall. */
+export interface ReactiveRecallMemory extends EnrichedMemory {
+  matching_keyword_count: number;
+  matching_keywords: string | null;
+}
+
 export class MemoryRepository {
   constructor(private pool: sql.ConnectionPool) {}
 
@@ -615,6 +621,75 @@ export class MemoryRepository {
         ${dateClause}
         ${typeFilter}
       ORDER BY m.salience DESC, m.created_at DESC
+    `);
+
+    return result.recordset;
+  }
+
+  // ── Reactive Recall (keyword matching for you_should_know) ──────
+
+  /**
+   * Find contributed memories from other agents that share keywords
+   * with the just-logged memory. Used by log_disposition to populate
+   * the you_should_know reactive recall response.
+   *
+   * Uses exact keyword match (IN, not LIKE) because both sides are
+   * normalized at extraction time. Returns enriched data for effective
+   * salience computation plus matching keyword metadata.
+   */
+  async reactiveRecallByKeywords(
+    agentId: string,
+    excludeMemoryId: string,
+    keywords: string[],
+    limit: number = 5
+  ): Promise<ReactiveRecallMemory[]> {
+    if (keywords.length === 0) return [];
+
+    // Build dynamic IN clause parameters
+    const kwParams = keywords.map((_, i) => `@kw_${i}`).join(", ");
+
+    const request = this.pool
+      .request()
+      .input("agent_id", sql.UniqueIdentifier, agentId)
+      .input("exclude_memory_id", sql.UniqueIdentifier, excludeMemoryId)
+      .input("limit", sql.Int, limit);
+
+    keywords.forEach((kw, i) => {
+      request.input(`kw_${i}`, sql.NVarChar(100), kw);
+    });
+
+    const result = await request.query(`
+      SELECT TOP (@limit)
+        ${this.enrichedRecallColumns},
+        (SELECT COUNT(*)
+         FROM memory_keywords mk2
+         JOIN keywords k2 ON k2.keyword_id = mk2.keyword_id
+         WHERE mk2.memory_id = m.memory_id
+           AND k2.keyword IN (${kwParams})
+        ) AS matching_keyword_count,
+        (SELECT STRING_AGG(k3.keyword, ',')
+         FROM memory_keywords mk3
+         JOIN keywords k3 ON k3.keyword_id = mk3.keyword_id
+         WHERE mk3.memory_id = m.memory_id
+           AND k3.keyword IN (${kwParams})
+        ) AS matching_keywords
+      ${this.enrichedFromClause}
+      WHERE m.agent_id != @agent_id
+        AND m.visibility = 'contributed'
+        AND m.is_quarantined = 0
+        AND EXISTS (
+          SELECT 1 FROM agents a
+          WHERE a.agent_id = m.agent_id
+            AND a.status NOT IN ('quarantined', 'disabled')
+        )
+        AND m.memory_id != @exclude_memory_id
+        AND EXISTS (
+          SELECT 1 FROM memory_keywords mk
+          JOIN keywords k ON k.keyword_id = mk.keyword_id
+          WHERE mk.memory_id = m.memory_id
+            AND k.keyword IN (${kwParams})
+        )
+      ORDER BY matching_keyword_count DESC, m.salience DESC, m.created_at DESC
     `);
 
     return result.recordset;
