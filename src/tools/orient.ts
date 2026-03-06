@@ -73,6 +73,12 @@ export function registerOrient(
         console.error(
           `[orient] Model transition: ${agent.current_model} → ${config.modelVersion}`
         );
+      } else if (agent && !agent.current_model) {
+        // Bootstrap: agent has no model recorded yet — initialize it
+        await agentRepo.updateModelVersion(agentId, config.modelVersion);
+        console.error(
+          `[orient] Bootstrapped current_model for agent: ${config.modelVersion}`
+        );
       }
 
       // ── 2. Get or create session ────────────────────────────────

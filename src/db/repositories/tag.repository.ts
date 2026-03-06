@@ -51,7 +51,9 @@ export class TagRepository {
     memoryId: string,
     tagNames: string[]
   ): Promise<void> {
-    for (const name of tagNames) {
+    // Deduplicate to prevent PK violation on memory_context_tags
+    const unique = [...new Set(tagNames)];
+    for (const name of unique) {
       const tagId = await this.getOrCreateTag(name);
       await this.linkMemoryTag(memoryId, tagId);
     }

@@ -1,7 +1,7 @@
 {
   "suite": "effective-salience",
-  "timestamp": "2026-03-06T14:59:01.624Z",
-  "total_ms": 3.96,
+  "timestamp": "2026-03-06T17:00:23.997Z",
+  "total_ms": 2.35,
   "assertions": {
     "passed": 34,
     "failed": 0,
@@ -10,126 +10,126 @@
   "sections": [
     {
       "name": "Fresh Memory (age=0)",
-      "ms": 0.52,
+      "ms": 0.34,
       "assertions": 5,
       "passed": 5,
       "failed": 0
     },
     {
       "name": "Time Decay (30 days)",
-      "ms": 0.33,
-      "assertions": 3,
-      "passed": 3,
-      "failed": 0
-    },
-    {
-      "name": "Unresolved Tension Slows Decay",
-      "ms": 0.16,
-      "assertions": 2,
-      "passed": 2,
-      "failed": 0
-    },
-    {
-      "name": "Memory Type Effects",
-      "ms": 0.14,
-      "assertions": 2,
-      "passed": 2,
-      "failed": 0
-    },
-    {
-      "name": "Access Boost",
-      "ms": 0.17,
-      "assertions": 2,
-      "passed": 2,
-      "failed": 0
-    },
-    {
-      "name": "Access Boost Recency Brackets",
-      "ms": 0.26,
-      "assertions": 3,
-      "passed": 3,
-      "failed": 0
-    },
-    {
-      "name": "Access Boost Cap",
-      "ms": 0.09,
-      "assertions": 1,
-      "passed": 1,
-      "failed": 0
-    },
-    {
-      "name": "Reinforcement Boost",
-      "ms": 0.09,
-      "assertions": 1,
-      "passed": 1,
-      "failed": 0
-    },
-    {
-      "name": "Reinforcement Boost (no data)",
-      "ms": 0.09,
-      "assertions": 1,
-      "passed": 1,
-      "failed": 0
-    },
-    {
-      "name": "Reinforcement Boost Cap",
-      "ms": 0.08,
-      "assertions": 1,
-      "passed": 1,
-      "failed": 0
-    },
-    {
-      "name": "Self-Contestation Drag",
-      "ms": 0.13,
-      "assertions": 2,
-      "passed": 2,
-      "failed": 0
-    },
-    {
-      "name": "External Contestation Drag",
-      "ms": 0.16,
-      "assertions": 1,
-      "passed": 1,
-      "failed": 0
-    },
-    {
-      "name": "Combined Contestation",
-      "ms": 0.11,
-      "assertions": 1,
-      "passed": 1,
-      "failed": 0
-    },
-    {
-      "name": "Verified Memory",
-      "ms": 0.12,
-      "assertions": 2,
-      "passed": 2,
-      "failed": 0
-    },
-    {
-      "name": "Floor Clamp (0.0)",
-      "ms": 0.08,
-      "assertions": 1,
-      "passed": 1,
-      "failed": 0
-    },
-    {
-      "name": "Ceiling Clamp (1.0)",
-      "ms": 0.08,
-      "assertions": 1,
-      "passed": 1,
-      "failed": 0
-    },
-    {
-      "name": "Spec Decay Profile Validation",
       "ms": 0.19,
       "assertions": 3,
       "passed": 3,
       "failed": 0
     },
     {
+      "name": "Unresolved Tension Slows Decay",
+      "ms": 0.08,
+      "assertions": 2,
+      "passed": 2,
+      "failed": 0
+    },
+    {
+      "name": "Memory Type Effects",
+      "ms": 0.06,
+      "assertions": 2,
+      "passed": 2,
+      "failed": 0
+    },
+    {
+      "name": "Access Boost",
+      "ms": 0.16,
+      "assertions": 2,
+      "passed": 2,
+      "failed": 0
+    },
+    {
+      "name": "Access Boost Recency Brackets",
+      "ms": 0.1,
+      "assertions": 3,
+      "passed": 3,
+      "failed": 0
+    },
+    {
+      "name": "Access Boost Cap",
+      "ms": 0.02,
+      "assertions": 1,
+      "passed": 1,
+      "failed": 0
+    },
+    {
+      "name": "Reinforcement Boost",
+      "ms": 0.04,
+      "assertions": 1,
+      "passed": 1,
+      "failed": 0
+    },
+    {
+      "name": "Reinforcement Boost (no data)",
+      "ms": 0.04,
+      "assertions": 1,
+      "passed": 1,
+      "failed": 0
+    },
+    {
+      "name": "Reinforcement Boost Cap",
+      "ms": 0.03,
+      "assertions": 1,
+      "passed": 1,
+      "failed": 0
+    },
+    {
+      "name": "Self-Contestation Drag",
+      "ms": 0.03,
+      "assertions": 2,
+      "passed": 2,
+      "failed": 0
+    },
+    {
+      "name": "External Contestation Drag",
+      "ms": 0.1,
+      "assertions": 1,
+      "passed": 1,
+      "failed": 0
+    },
+    {
+      "name": "Combined Contestation",
+      "ms": 0.04,
+      "assertions": 1,
+      "passed": 1,
+      "failed": 0
+    },
+    {
+      "name": "Verified Memory",
+      "ms": 0.07,
+      "assertions": 2,
+      "passed": 2,
+      "failed": 0
+    },
+    {
+      "name": "Floor Clamp (0.0)",
+      "ms": 0.03,
+      "assertions": 1,
+      "passed": 1,
+      "failed": 0
+    },
+    {
+      "name": "Ceiling Clamp (1.0)",
+      "ms": 0.03,
+      "assertions": 1,
+      "passed": 1,
+      "failed": 0
+    },
+    {
+      "name": "Spec Decay Profile Validation",
+      "ms": 0.06,
+      "assertions": 3,
+      "passed": 3,
+      "failed": 0
+    },
+    {
       "name": "Edge: null last_accessed_at",
-      "ms": 0.24,
+      "ms": 0.1,
       "assertions": 2,
       "passed": 2,
       "failed": 0
